@@ -1,0 +1,30 @@
+{% load static %}
+{% load tailwind_tags %} <!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WhichGame{% endblock %}</title>
+    
+    {% tailwind_css %} 
+</head>
+<body class="bg-gray-100 font-sans antialiased flex flex-col min-h-screen">
+    <header class="p-4 text-center text-2xl font-semibold shadow-md nav-color">
+        {% block header %}
+        WhichGame
+        {% endblock %}
+    </header>
+    <main class="w-full max-w-5xl mx-auto flex-grow p-4 mb-20">
+        {% block content %}
+        {% endblock %}
+    </main>
+    <footer class="w-full bg-gray-800 text-white text-center p-4 mt-auto">
+        {% block footer %}
+        &copy; 2024 WhichGame. Tous droits réservés.
+        {% endblock %}
+    </footer>
+
+    {% block extra_js %}
+    {% endblock extra_js %}
+</body>
+</html>

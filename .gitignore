@@ -1,0 +1,43 @@
+# --- Environnement virtuel ---
+# Ne jamais versionner l'environnement virtuel
+venv/
+.venv/
+
+# Paramètres spécifiques à l'utilisateur
+.vscode/
+
+# --- Fichiers système (macOS / Windows) ---
+.DS_Store
+
+# --- Fichiers Python ---
+# Cache et bytecode
+__pycache__/
+*.pyc
+.python-version
+
+# Fichiers de packaging et distribution
+build/
+dist/
+*.egg-info/
+
+# --- Fichiers Django ---
+# La base de données de développement. Ne JAMAIS la pusher !
+db.sqlite3
+*.sqlite3
+
+# Fichiers statiques collectés (ils sont générés en production)
+staticfiles/
+
+# Fichiers uploadés par les utilisateurs (photos des recettes, etc.)
+mediafiles/
+
+# --- Fichiers sensibles ---
+# Logs
+*.log
+logs/
+
+# Fichiers d'environnement (pour les clés secrètes)
+.env
+.env.*
+
+
