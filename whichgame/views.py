@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.views.generic import ListView
+from .models import Game
 
-def home(request):
-    return render(request, 'whichgame/home.html')
+class HomeListView(ListView):
+    model = Game
