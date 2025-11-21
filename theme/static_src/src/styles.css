@@ -8,3 +8,24 @@
   * the scope of this path.
   */
 @source "../../../**/*.{html,py,js}";
+
+@layer base {
+  html{
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .card-gradient { background: linear-gradient(to top, rgba(15, 23, 42, 1) 0%, rgba(15, 23, 42, 0) 60%); }
+  .btn-pill { @apply inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95; }
+  .badge-blur { @apply px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 backdrop-blur-md shadow-sm border border-white/5; }
+  .detail-label { @apply text-[10px] uppercase font-bold tracking-wider text-slate-500 mb-1 block; }
+  .ease-out-cubic { transition-timing-function: cubic-bezier(0.33, 1, 0.68, 1); }
+  .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px;}
+  .btn-filter {
+        @apply inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium hover:bg-slate-700 hover:text-white active:scale-95 cursor-pointer;
+    }
+
+}
