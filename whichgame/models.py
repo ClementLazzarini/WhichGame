@@ -13,7 +13,7 @@ class Game(models.Model):
     genres = models.JSONField(default=list)    # ex: ["RPG", "Action"]
     
     # Les stats
-    rating = models.FloatField(null=True, blank=True)      
+    rating = models.IntegerField(null=True, blank=True)      
     price_current = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True) 
     playtime_main = models.IntegerField(null=True, blank=True) # En heures
     

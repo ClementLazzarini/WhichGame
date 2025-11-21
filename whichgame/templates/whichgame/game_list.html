@@ -38,39 +38,89 @@
 </header>
 
 <main class="container mx-auto px-4 py-8">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {% for game in object_list %} 
-        <article class="bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-blue-500/10 hover:scale-[1.02] transition-all duration-300 group cursor-pointer">
-            
-            <div class="relative aspect-[4/5] overflow-hidden">
-                <img src="{{game.cover_url}}"
-                        alt="{{game.title}}" 
-                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-            </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {% for game in object_list %}
 
-            <div class="p-4">
-                <h3 class="text-lg font-bold truncate group-hover:text-blue-400 transition">
-                    {{game.title}}
-                </h3>
+    <article 
+        x-data="{ isFlipped: false }"
+        @mouseenter="isFlipped = true"
+        @mouseleave="isFlipped = false"
+        @click="isFlipped = !isFlipped"
+        class="rounded-xl shadow-lg hover:shadow-blue-500/20 transition-all duration-300 cursor-pointer bg-transparent [perspective:1000px] h-[480px] group z-10 relative"
+    >
+        <div class="relative h-full w-full transition-all duration-1000 [transform-style:preserve-3d]"
+             :class="isFlipped ? '[transform:rotateY(180deg)]' : ''">
 
-                <div class="flex flex-wrap items-center gap-2 mt-3">
-                    
-                    <div class="px-2.5 py-1 rounded-lg bg-green-500/20 text-green-300 text-xs font-bold flex items-center gap-1">
-                        <i class="fa-solid fa-star text-[10px]"></i> {{game.rating}}
-                    </div>
+            <div class="absolute inset-0 h-full w-full bg-slate-800 rounded-xl overflow-hidden [backface-visibility:hidden] flex flex-col shadow-xl">
+                
+                <div class="relative flex-grow overflow-hidden w-full">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent z-10"></div>
+                    <img src="{{ game.cover_url }}" 
+                         alt="{{game.title}}" 
+                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                </div>
 
-                    <div class="px-2.5 py-1 rounded-lg bg-slate-700 text-blue-200 text-xs font-medium flex items-center gap-1">
-                        <i class="fa-regular fa-clock text-[10px]"></i> {{game.playtime_main}}h
-                    </div>
+                <div class="p-4 flex-shrink-0 relative z-20 bg-slate-800/30 backdrop-blur-sm border-t border-slate-700/50">
+                    <h3 class="text-lg font-bold truncate text-white group-hover:text-blue-400 transition leading-tight mb-3 shadow-sm">
+                        {{game.title}}
+                    </h3>
 
-                    <div class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 text-xs font-bold flex items-center gap-1 ml-auto">
-                        {{game.price_current}}€
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="px-2.5 py-1 rounded-lg bg-green-500/20 text-green-300 text-xs font-bold flex items-center gap-1 backdrop-blur-md shadow-sm">
+                            <i class="fa-solid fa-star text-[10px]"></i> {{game.rating}}
+                        </div>
+                        <div class="px-2.5 py-1 rounded-lg bg-slate-700/80 text-blue-200 text-xs font-medium flex items-center gap-1 backdrop-blur-md shadow-sm">
+                            <i class="fa-regular fa-clock text-[10px]"></i> {{game.playtime_main}}h
+                        </div>
+                        <div class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 text-xs font-bold flex items-center gap-1 ml-auto backdrop-blur-md shadow-sm">
+                            {{game.price_current}}€
+                        </div>
                     </div>
                 </div>
             </div>
-        </article>
-        {% endfor %}
+            <div class="absolute inset-0 h-full w-full rounded-xl bg-slate-900/95 border border-slate-700 p-5 text-slate-200 [transform:rotateY(180deg)] [backface-visibility:hidden] flex flex-col overflow-hidden shadow-xl">
+                
+                <div class="flex-shrink-0 mb-4">
+                     <h3 class="text-lg font-bold text-blue-400 mb-3 truncate">{{game.title}}</h3>
+                     <div class="flex gap-3 text-xs py-2 border-y border-slate-800/80">
+                        <span class="flex items-center gap-1"><i class="fa-solid fa-star text-green-400"></i> <b>{{game.rating}}</b></span>
+                        <span class="flex items-center gap-1"><i class="fa-regular fa-clock text-blue-400"></i> <b>{{game.playtime_main}}h</b></span>
+                        <span class="flex items-center gap-1 ml-auto"><i class="fa-solid fa-tag text-amber-400"></i> <b>{{game.price_current}}€</b></span>
+                     </div>
+                </div>
 
-    </div>
+                <div class="flex-grow overflow-hidden relative space-y-3 text-sm py-2">
+                     <div class="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-slate-900/95 to-transparent pointer-events-none z-10"></div>
+                    
+                    <div>
+                        <span class="text-slate-500 block text-[10px] uppercase font-bold tracking-wider mb-1">Genres</span>
+                        <p class="font-medium leading-snug">{{ game.genres|join:", " }}</p>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block text-[10px] uppercase font-bold tracking-wider mb-1">Plateformes</span>
+                        <div class="flex flex-wrap gap-1.5 mt-0.5">
+                            {% for platform in game.platforms %}
+                            <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] text-slate-300 whitespace-nowrap">{{ platform }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-auto flex-shrink-0 pt-4 z-20">
+                    <a href="https://www.cheapshark.com/search#q={{ game.title|urlencode }}" target="_blank" class="block w-full text-center bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-2 shadow-md text-sm relative overflow-hidden group/btn">
+                         <div class="absolute inset-0 h-full w-1/2 bg-white/20 skew-x-12 -translate-x-full group-hover/btn:animate-[shimmer_1s_ease-in-out_infinite]"></div>
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        Voir l'offre
+                    </a>
+                    <p class="text-center text-[10px] text-slate-500 mt-2 opacity-70">
+                        <span class="hidden md:inline">Survolez</span><span class="md:hidden">Tapez</span> ailleurs pour fermer
+                    </p>
+                </div>
+
+            </div>
+             </div>
+    </article>
+    {% endfor %}
+</div>
 </main>
 {% endblock %} 
