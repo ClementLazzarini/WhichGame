@@ -1,7 +1,6 @@
 {% extends "base.html" %} 
 {% load static %} 
-
-{% block content %}
+{% load my_filters %} {% block content %}
 <header 
     class="sticky top-0 z-50 w-full bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 py-4 shadow-md"
     x-data="{ openFilter: null }" 
@@ -19,8 +18,8 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2 relative">
-                
-                <div class="relative">
+    
+                <div class="relative"> 
                     <button 
                         @click="openFilter = (openFilter === 'price' ? null : 'price')"
                         class="btn-filter transition-all duration-300"
@@ -36,27 +35,59 @@
                     </button>
 
                     <div x-show="openFilter === 'price'"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 translate-y-2"
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         x-transition:leave="transition ease-in duration-150"
-                         x-transition:leave-start="opacity-100 translate-y-0"
-                         x-transition:leave-end="opacity-0 translate-y-2"
-                         class="absolute top-full left-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50 p-1"
-                         style="display: none;">
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 translate-y-2"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 translate-y-2"
+                        class="absolute top-full left-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-50 p-1"
+                        style="display: none;">
                         
-                        <p class="px-3 py-2 text-[10px] text-slate-500 uppercase font-bold">Prix Maximum</p>
-                        {% for price in "10,20,30,40,60"|make_list %}
-                        <a href="?price={{ price }}" class="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-blue-600 hover:text-white transition-colors flex justify-between items-center">
-                            <span>{{ price }}€</span>
-                            {% if request.GET.price == price %}<i class="fa-solid fa-check text-xs"></i>{% endif %}
-                        </a>
-                        {% endfor %}
-                        {% if request.GET.price %}
-                        <div class="border-t border-slate-700 mt-1 pt-1">
-                            <a href="?" class="block px-3 py-2 text-xs text-red-400 hover:text-red-300 text-center">Réinitialiser</a>
-                        </div>
-                        {% endif %}
+                        <form method="GET" x-ref="priceForm" class="px-3"  x-data="{ price: '{{ request.GET.price|default:'60' }}' }">
+                            
+                            {% if request.GET.duration %}
+                            <input type="hidden" name="duration" value="{{ request.GET.duration }}">
+                            {% endif %}
+                            
+                            <div class="flex justify-between items-end ">
+                                <span class="pb-1 text-[10px] text-slate-500 uppercase font-bold">Budget Max</span>
+                                <div class="text-white font-black text-2xl flex items-baseline">
+                                    <span x-text="price"></span>
+                                    <span class="text-base text-blue-500 ml-0.5">€</span>
+                                </div>
+                            </div>
+
+                            <div class="relative w-full h-6 flex items-center">
+                                <input 
+                                    type="range" 
+                                    name="price" 
+                                    min="0" 
+                                    max="100" 
+                                    step="5"
+                                    x-model="price"
+                                    @change="$refs.priceForm.submit()" 
+                                    class="w-full absolute z-20 h-2 bg-transparent appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
+                                >
+                                <div class="absolute z-10 top-1/2 left-0 right-0 h-1.5 bg-slate-600 rounded-full -translate-y-1/2"></div>
+                                <div class="absolute z-10 top-1/2 left-0 h-1.5 bg-blue-500 rounded-full -translate-y-1/2 pointer-events-none"
+                                    :style="'width: ' + (price) + '%'"></div>
+                            </div>
+                            
+                            <div class="flex justify-between text-[10px] text-slate-500 mt-2 font-medium">
+                                <span>Gratuit</span>
+                                <span>100€ +</span>
+                            </div>
+
+                            {% if request.GET.price %}
+                            <div class="border-t border-slate-700 mt-1 pt-1">
+                                <a href="?{% url_replace price=None %}" class="block px-3 py-2 text-xs text-red-400 hover:text-red-300 text-center">
+                                    Réinitialiser
+                                </a>
+                            </div>
+                            {% endif %}
+
+                        </form>
                     </div>
                 </div>
 
@@ -82,18 +113,22 @@
                          style="display: none;">
                         
                         <p class="px-3 py-2 text-[10px] text-slate-500 uppercase font-bold">Temps de jeu</p>
-                        <a href="?duration=short" class="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-blue-600 hover:text-white transition-colors">
+                        
+                        <a href="?{% url_replace duration='short' %}" class="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-blue-600 hover:text-white transition-colors">
                             Court <span class="opacity-50 text-xs ml-1">(- 10h)</span>
                         </a>
-                        <a href="?duration=medium" class="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-blue-600 hover:text-white transition-colors">
+                        <a href="?{% url_replace duration='medium' %}" class="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-blue-600 hover:text-white transition-colors">
                             Moyen <span class="opacity-50 text-xs ml-1">(10 - 30h)</span>
                         </a>
-                        <a href="?duration=long" class="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-blue-600 hover:text-white transition-colors">
+                        <a href="?{% url_replace duration='long' %}" class="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-blue-600 hover:text-white transition-colors">
                             Long <span class="opacity-50 text-xs ml-1">(+ 30h)</span>
                         </a>
+                        
                          {% if request.GET.duration %}
                         <div class="border-t border-slate-700 mt-1 pt-1">
-                            <a href="?" class="block px-3 py-2 text-xs text-red-400 hover:text-red-300 text-center">Réinitialiser</a>
+                            <a href="?{% url_replace duration=None %}" class="block px-3 py-2 text-xs text-red-400 hover:text-red-300 text-center">
+                                Réinitialiser
+                            </a>
                         </div>
                         {% endif %}
                     </div>
@@ -193,7 +228,7 @@
                 </div>
 
                  <div class="mt-auto pt-4">
-                    <a href="https://www.cheapshark.com/search#q={{ game.title|urlencode }}" 
+                    <a href="https://www.cheapshark.com/search#q:{{ game.title|urlencode }}" 
                        target="_blank" 
                        @click.stop
                        class="group/btn relative w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-3 rounded-xl transition-all duration-200 shadow-md overflow-hidden">
