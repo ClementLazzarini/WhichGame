@@ -2,73 +2,95 @@ import requests
 from django.core.management.base import BaseCommand
 from decouple import config
 from whichgame.models import Game
-from howlongtobeatpy import HowLongToBeat # NOUVEAU
+from howlongtobeatpy import HowLongToBeat
 
 class Command(BaseCommand):
-    help = 'Importe les jeux depuis IGDB, enrichit avec CheapShark et HLTB'
+    help = 'Importe les jeux avec paramètres (offset/limit)'
 
-    def handle(self, *args, **kwargs):
-        self.stdout.write("🚀 Démarrage de l'importation COMPLÈTE...")
+    # 1. NOUVEAU : On définit les arguments acceptés
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--offset',
+            type=int,
+            default=0,
+            help='À partir de quel jeu commencer (par défaut 0)'
+        )
+        parser.add_argument(
+            '--limit',
+            type=int,
+            default=50,
+            help='Combien de jeux importer (par défaut 50)'
+        )
 
-        # 1. --- AUTHENTIFICATION IGDB ---
+    def handle(self, *args, **options):
+        # 2. On récupère les valeurs passées en commande
+        offset = options['offset']
+        limit = options['limit']
+
+        self.stdout.write(f"🚀 Démarrage : Import de {limit} jeux à partir du rang {offset}...")
+
+        # --- AUTHENTIFICATION (Inchangé) ---
         client_id = config('IGDB_CLIENT_ID')
         client_secret = config('IGDB_CLIENT_SECRET')
         
-        auth_response = requests.post("https://id.twitch.tv/oauth2/token", params={
-            'client_id': client_id,
-            'client_secret': client_secret,
-            'grant_type': 'client_credentials'
+        auth_req = requests.post("https://id.twitch.tv/oauth2/token", params={
+            'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'
         })
-        access_token = auth_response.json()['access_token']
+        access_token = auth_req.json()['access_token']
 
-        # 2. --- REQUÊTE IGDB (Top 10 pour tester) ---
+        # --- REQUÊTE IGDB DYNAMIQUE ---
         url = "https://api.igdb.com/v4/games"
         headers = {'Client-ID': client_id, 'Authorization': f'Bearer {access_token}'}
         
-        # On demande les infos de base
-        body = "fields name, slug, rating, cover.url, platforms.name, genres.name; sort rating_count desc; limit 50; offset 0;"
+        # 3. Utilisation des variables limit et offset dans la requête (f-string)
+        body = f"""
+            fields name, slug, rating, cover.url, platforms.name, genres.name, release_dates.y; 
+            sort rating_count desc; 
+            limit {limit}; 
+            offset {offset};
+        """
         
-        self.stdout.write("📡 Téléchargement des données IGDB...")
         response = requests.post(url, headers=headers, data=body)
-
-        if response.status_code != 200:
-            self.stdout.write(self.style.ERROR(f"❌ Erreur IGDB: {response.text}"))
+        games_data = response.json()
+        
+        if not games_data:
+            self.stdout.write(self.style.WARNING("⚠️ Aucun jeu trouvé (fin de la liste ?)"))
             return
 
-        games_data = response.json()
-        self.stdout.write(f"📦 Traitement de {len(games_data)} jeux (Cela va prendre du temps)...")
-
-        # Initialisation de l'outil HLTB
+        self.stdout.write(f"📦 Traitement de {len(games_data)} jeux...")
+        
         hltb_tool = HowLongToBeat()
 
-        # 3. --- BOUCLE UNIQUE DE TRAITEMENT ---
+        # --- BOUCLE DE TRAITEMENT (Identique à avant) ---
         for data in games_data:
-            if 'name' not in data: continue # Sécurité
-
+            if 'name' not in data: continue 
             game_name = data['name']
 
-            # A. PRIX (CheapShark)
+            # Année
+            release_year = None
+            if 'release_dates' in data:
+                years = [d['y'] for d in data['release_dates'] if 'y' in d]
+                if years: release_year = min(years)
+
+            # Prix
             price = self.get_cheapshark_price(game_name)
             
-            # B. TEMPS DE JEU (HowLongToBeat) - NOUVEAU
+            # Temps (Avec petite sécurité erreur)
             playtime_hours = 0
             try:
-                # On cherche le jeu (ça peut prendre un peu de temps)
                 results = hltb_tool.search(game_name)
-                if results and len(results) > 0:
-                    # On prend le meilleur résultat qui correspond au nom
+                if results:
                     best_match = max(results, key=lambda x: x.similarity)
-                    playtime_hours = int(best_match.main_story) # On prend l'histoire principale
-            except Exception as e:
-                self.stdout.write(self.style.WARNING(f"   ⚠️ Pas de temps trouvé pour {game_name} Erreur : {e}"))
+                    playtime_hours = int(best_match.main_story)
+            except: pass
 
-            # C. IMAGE (Nettoyage)
+            # Image
             cover_url = ""
             if 'cover' in data and 'url' in data['cover']:
                 cover_url = data['cover']['url'].replace('t_thumb', 't_cover_big')
                 if cover_url.startswith('//'): cover_url = f"https:{cover_url}"
 
-            # D. SAUVEGARDE BDD
+            # Sauvegarde
             try:
                 game, created = Game.objects.update_or_create(
                     igdb_id=data['id'],
@@ -80,23 +102,22 @@ class Command(BaseCommand):
                         'platforms': [p['name'] for p in data.get('platforms', [])],
                         'genres': [g['name'] for g in data.get('genres', [])],
                         'price_current': price,
-                        'playtime_main': playtime_hours
+                        'playtime_main': playtime_hours,
+                        'release_year': release_year
                     }
                 )
-                
-                status = "✨ Créé" if created else "🔄 Mis à jour"
-                self.stdout.write(f"{status}: {game.title} | 💰 {price}€ | ⏱️ {playtime_hours}h")
-                
+                action = "✨" if created else "🔄"
+                # Petit log plus compact
+                self.stdout.write(f"{action} {game.title[:20]}... ({release_year})")
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f"❌ Erreur BDD : {e}"))
+                self.stdout.write(self.style.ERROR(f"Err: {e}"))
 
-        self.stdout.write(self.style.SUCCESS("🎉 Import terminé ! Toutes les données sont là."))
+        self.stdout.write(self.style.SUCCESS("🎉 Batch terminé !"))
 
     def get_cheapshark_price(self, game_name):
-        """Interroge CheapShark pour trouver le prix le plus bas actuel"""
         try:
             url = f"https://www.cheapshark.com/api/1.0/games?title={game_name}&limit=1"
-            res = requests.get(url)
+            res = requests.get(url, timeout=5)
             data = res.json()
             if data: return float(data[0]['cheapest'])
             return 0.00
