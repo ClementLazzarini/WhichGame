@@ -26,12 +26,17 @@ class Command(BaseCommand):
         headers = {'Client-ID': client_id, 'Authorization': f'Bearer {access_token}'}
         
         # On demande les infos de base
-        body = "fields name, slug, rating, cover.url, platforms.name, genres.name; sort rating_count desc; limit 10;"
+        body = "fields name, slug, rating, cover.url, platforms.name, genres.name; sort rating_count desc; limit 50; offset 0;"
         
+        self.stdout.write("📡 Téléchargement des données IGDB...")
         response = requests.post(url, headers=headers, data=body)
+
+        if response.status_code != 200:
+            self.stdout.write(self.style.ERROR(f"❌ Erreur IGDB: {response.text}"))
+            return
+
         games_data = response.json()
-        
-        self.stdout.write(f"📦 Traitement de {len(games_data)} jeux...")
+        self.stdout.write(f"📦 Traitement de {len(games_data)} jeux (Cela va prendre du temps)...")
 
         # Initialisation de l'outil HLTB
         hltb_tool = HowLongToBeat()

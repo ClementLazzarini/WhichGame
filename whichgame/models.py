@@ -2,20 +2,20 @@ from django.db import models
 
 class Game(models.Model):
     # ID technique IGDB (CRUCIAL pour les mises à jour sans doublons)
-    igdb_id = models.IntegerField(unique=True, null=True, blank=True)
+    igdb_id = models.IntegerField(unique=True, null=True, blank=True, db_index=True)
     
     title = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=255, unique=True) # J'ai augmenté la taille, certains slugs sont longs
-    cover_url = models.URLField(blank=True, max_length=500) # Parfois les URL sont longues
+    slug = models.SlugField(max_length=255, unique=True)
+    cover_url = models.URLField(blank=True, max_length=500)
     
     # Filtres principaux (JSONField est parfait ici)
-    platforms = models.JSONField(default=list) # ex: ["PC", "PS5"]
-    genres = models.JSONField(default=list)    # ex: ["RPG", "Action"]
+    platforms = models.JSONField(default=list)
+    genres = models.JSONField(default=list)
     
     # Les stats
-    rating = models.IntegerField(null=True, blank=True)      
-    price_current = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True) 
-    playtime_main = models.IntegerField(null=True, blank=True) # En heures
+    rating = models.IntegerField(null=True, blank=True , db_index=True)      
+    price_current = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, db_index=True) 
+    playtime_main = models.IntegerField(null=True, blank=True, db_index=True)
     
     updated_at = models.DateTimeField(auto_now=True) 
     
