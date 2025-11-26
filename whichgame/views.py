@@ -25,7 +25,11 @@ class HomeListView(ListView):
         # 2. Filtre Prix
         if price:
             try:
-                queryset = queryset.filter(price_current__lte=float(price))
+                price_val = float(price)
+                # On garde les jeux MOINS CHERS que la limite OU ceux qui n'ont PAS DE PRIX (None)
+                queryset = queryset.filter(
+                    Q(price_current__lte=price_val) | Q(price_current__isnull=True)
+                )
             except ValueError:
                 pass
 

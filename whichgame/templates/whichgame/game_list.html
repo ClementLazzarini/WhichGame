@@ -212,9 +212,19 @@
                             <i class="fa-regular fa-clock text-[10px]"></i> {{game.playtime_main}}h
                         </span>
                     </div>
-                    <span class="badge-blur text-amber-300 bg-amber-500/20 font-bold">
-                        {{game.price_current}}€
-                    </span>
+                    {% if game.price_current is None %}
+                        <span class="badge-blur text-slate-400 bg-slate-700/30 font-medium text-xs">
+                            Non dispo
+                        </span>
+                    {% elif game.price_current == 0 %}
+                        <span class="badge-blur text-green-300 bg-green-500/20 font-bold">
+                            GRATUIT
+                        </span>
+                    {% else %}
+                        <span class="badge-blur text-amber-300 bg-amber-500/20 font-bold">
+                            {{ game.price_current }}€
+                        </span>
+                    {% endif %}
                 </div>
             </div>
 
@@ -269,19 +279,58 @@
                     </div>
                 </div>
 
-                 <div class="mt-auto pt-4">
-                    <a href="https://www.cheapshark.com/search#q:{{ game.title|urlencode }}" 
-                       target="_blank" 
-                       @click.stop
-                       class="group/btn relative w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-3 rounded-xl transition-all duration-200 shadow-md overflow-hidden">
-                        
-                        <div class="absolute inset-0 h-full w-1/2 bg-white/20 skew-x-12 -translate-x-[150%] group-hover/btn:animate-[shimmer_1s_ease-in-out_infinite] z-0"></div>
-                        
-                        <span class="relative z-10 flex items-center gap-2">
-                            <i class="fa-solid fa-cart-shopping"></i>
-                            Voir l'offre <span class="text-blue-200 text-xs ml-1">({{game.price_current}}€)</span>
-                        </span>
-                    </a>
+                <div class="mt-auto pt-4">
+    
+                    {# CAS 1 : Prix PC trouvé (Cheapshark) #}
+                    {% if game.price_current is not None %}
+                        <a href="https://www.cheapshark.com/search#q:{{ game.title|urlencode }}" 
+                        target="_blank" 
+                        @click.stop
+                        class="group/btn relative w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-3 rounded-xl transition-all duration-200 shadow-md overflow-hidden">
+                            <span class="relative z-10 flex items-center gap-2">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                                Voir l'offre <span class="text-blue-200 text-xs ml-1">({{game.price_current}}€)</span>
+                            </span>
+                        </a>
+
+                    {# CAS 2 : Nintendo (Switch, Wii U, 3DS...) #}
+                    {% elif "Nintendo Switch" in game.platforms or "Wii U" in game.platforms or "Nintendo 3DS" in game.platforms %}
+                        <a href="https://www.nintendo.fr/Rechercher/Rechercher-299117.html?q={{ game.title|urlencode }}" 
+                        target="_blank"
+                        @click.stop
+                        class="group/btn w-full flex items-center justify-center gap-2 bg-[#e60012] hover:bg-[#ff0019] text-white font-bold py-3 rounded-xl transition-all shadow-md">
+                            <i class="fa-solid fa-gamepad"></i>
+                            Voir sur Nintendo eShop
+                        </a>
+
+                    {# CAS 3 : PlayStation (PS5, PS4, PS3, Vita...) #}
+                    {% elif "PlayStation 5" in game.platforms or "PlayStation 4" in game.platforms or "PlayStation 3" in game.platforms %}
+                        <a href="https://store.playstation.com/fr-fr/search/{{ game.title|urlencode }}" 
+                        target="_blank"
+                        @click.stop
+                        class="group/btn w-full flex items-center justify-center gap-2 bg-[#00439c] hover:bg-[#005bc4] text-white font-bold py-3 rounded-xl transition-all shadow-md">
+                            <i class="fa-brands fa-playstation"></i>
+                            Voir sur PS Store
+                        </a>
+
+                    {# CAS 4 : Xbox (Series, One, 360...) #}
+                    {% elif "Xbox Series X|S" in game.platforms or "Xbox One" in game.platforms or "Xbox 360" in game.platforms %}
+                        <a href="https://www.xbox.com/fr-fr/search?q={{ game.title|urlencode }}" 
+                        target="_blank"
+                        @click.stop
+                        class="group/btn w-full flex items-center justify-center gap-2 bg-[#107c10] hover:bg-[#159415] text-white font-bold py-3 rounded-xl transition-all shadow-md">
+                            <i class="fa-brands fa-xbox"></i>
+                            Voir sur Xbox Store
+                        </a>
+
+                    {# CAS 5 : Offre introuvable #}
+                    {% else %}
+                        <button disabled class="w-full flex items-center justify-center gap-2 bg-slate-800 text-slate-500 font-bold py-3 rounded-xl cursor-not-allowed border border-slate-700">
+                            <i class="fa-solid fa-ban"></i>
+                            Offre non disponible
+                        </button>
+                    {% endif %}
+
                 </div>
 
             </div>
