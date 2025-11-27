@@ -29,6 +29,8 @@
                     {% if request.GET.price %}<input type="hidden" name="price" value="{{ request.GET.price }}">{% endif %}
                     {% if request.GET.duration %}<input type="hidden" name="duration" value="{{ request.GET.duration }}">{% endif %}
                     {% if request.GET.platform %}<input type="hidden" name="platform" value="{{ request.GET.platform }}">{% endif %}
+                    {% if request.GET.genre %}<input type="hidden" name="genre" value="{{ request.GET.genre }}">{% endif %}
+                    {% if request.GET.year %}<input type="hidden" name="year" value="{{ request.GET.year }}">{% endif %}
 
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fa-solid fa-search text-slate-500 group-focus-within:text-blue-500 transition-colors"></i>
@@ -51,7 +53,7 @@
 
                 <div class="h-6 w-px bg-slate-700 hidden sm:block mx-1"></div>
 
-                <div class="flex flex-wrap gap-2 items-center">
+                <div class="flex flex-wrap gap-2 items-center justify-center">
                     
                     <div class="relative"> 
                         <button 
@@ -65,13 +67,15 @@
 
                         <div x-show="openFilter === 'price'"
                             x-transition
-                            class="absolute top-full left-0 mt-2 w-64 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-4"
+                            class="absolute top-full left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 mt-2 w-64 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-4"
                             style="display: none;">
                             
                             <form method="GET" x-ref="priceForm" x-data="{ price: '{{ request.GET.price|default:'50' }}' }">
                                 {% if request.GET.duration %}<input type="hidden" name="duration" value="{{ request.GET.duration }}">{% endif %}
                                 {% if request.GET.search %}<input type="hidden" name="search" value="{{ request.GET.search }}">{% endif %}
                                 {% if request.GET.platform %}<input type="hidden" name="platform" value="{{ request.GET.platform }}">{% endif %}
+                                {% if request.GET.genre %}<input type="hidden" name="genre" value="{{ request.GET.genre }}">{% endif %}
+                                {% if request.GET.year %}<input type="hidden" name="year" value="{{ request.GET.year }}">{% endif %}
                                 
                                 <div class="flex justify-between items-end mb-4">
                                     <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Budget Max</span>
@@ -79,35 +83,18 @@
                                         <span x-text="price"></span><span class="text-sm text-blue-500 ml-1">€</span>
                                     </div>
                                 </div>
-
                                 <div class="relative w-full h-6 flex items-center mb-2">
-                                    <input 
-                                        type="range" 
-                                        name="price" 
-                                        min="0" 
-                                        max="100" 
-                                        step="5"
-                                        x-model="price"
-                                        @change="$refs.priceForm.submit()" 
-                                        class="absolute z-20 w-full h-2 opacity-0 cursor-pointer"
-                                    >
+                                    <input type="range" name="price" min="0" max="100" step="5" x-model="price" @change="$refs.priceForm.submit()" class="absolute z-20 w-full h-2 opacity-0 cursor-pointer">
                                     <div class="absolute z-10 top-1/2 left-0 right-0 h-1.5 bg-slate-600 rounded-full -translate-y-1/2 w-full"></div>
-                                    <div class="absolute z-10 top-1/2 left-0 h-1.5 bg-blue-500 rounded-full -translate-y-1/2 pointer-events-none"
-                                        :style="'width: ' + (price) + '%'"></div>
-                                    <div class="absolute z-10 top-1/2 h-4 w-4 bg-white rounded-full shadow-md border-2 border-blue-500 -translate-y-1/2 pointer-events-none transition-all"
-                                         :style="'left: ' + (price) + '%'"></div>
+                                    <div class="absolute z-10 top-1/2 left-0 h-1.5 bg-blue-500 rounded-full -translate-y-1/2 pointer-events-none" :style="'width: ' + (price) + '%'"></div>
+                                    <div class="absolute z-10 top-1/2 h-4 w-4 bg-white rounded-full shadow-md border-2 border-blue-500 -translate-y-1/2 pointer-events-none transition-all" :style="'left: ' + (price) + '%'"></div>
                                 </div>
-                                
                                 <div class="flex justify-between text-[10px] text-slate-500 font-bold uppercase mt-1">
-                                    <span>Gratuit</span>
-                                    <span>100€ +</span>
+                                    <span>Gratuit</span><span>100€ +</span>
                                 </div>
-
                                 {% if request.GET.price %}
                                 <div class="border-t border-slate-700 mt-3 pt-2 text-center">
-                                    <a href="?{% url_replace price=None page=None %}" class="text-xs text-red-400 hover:text-red-300 font-medium">
-                                        Réinitialiser
-                                    </a>
+                                    <a href="?{% url_replace price=None page=None %}" class="text-xs text-red-400 hover:text-red-300 font-medium">Réinitialiser</a>
                                 </div>
                                 {% endif %}
                             </form>
@@ -126,14 +113,71 @@
                             {% elif request.GET.duration == 'long' %}+ 30h
                             {% else %}Durée{% endif %}
                         </button>
-                        <div x-show="openFilter === 'duration'" x-transition class="absolute top-full left-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1" style="display: none;">
+                        <div x-show="openFilter === 'duration'" 
+                            x-transition class="absolute top-full left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1" 
+                            style="display: none;">
                             <a href="?{% url_replace duration='short' page=None %}" class="block px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg">Court (-10h)</a>
                             <a href="?{% url_replace duration='medium' page=None %}" class="block px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg">Moyen (10-30h)</a>
                             <a href="?{% url_replace duration='long' page=None %}" class="block px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg">Long (+30h)</a>
                             {% if request.GET.duration %}
-                                <div class="border-t border-slate-700 mt-1 pt-1">
-                                    <a href="?{% url_replace duration=None page=None %}" class="block py-2 text-xs text-red-400 text-center">Réinitialiser</a>
-                                </div>
+                                <div class="border-t border-slate-700 mt-1 pt-1"><a href="?{% url_replace duration=None page=None %}" class="block py-2 text-xs text-red-400 text-center">Réinitialiser</a></div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <button 
+                            @click="openFilter = (openFilter === 'year' ? null : 'year')"
+                            class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2"
+                            :class="{'bg-blue-600 text-white border-blue-600': '{{ request.GET.year }}' || openFilter === 'year', 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500': !'{{ request.GET.year }}' && openFilter !== 'year'}"
+                        >
+                            <i class="fa-regular fa-calendar text-xs"></i>
+                            {% if request.GET.year %}
+                                {% for y_val, y_label in years_list %}
+                                    {% if request.GET.year == y_val %}{{ y_label }}{% endif %}
+                                {% endfor %}
+                            {% else %}Sortie{% endif %}
+                        </button>
+
+                        <div x-show="openFilter === 'year'" 
+                                x-transition 
+                                class="absolute top-full right-0 md:left-0 md:right-auto mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1"
+                                style="display: none;">
+                            {% for y_val, y_label in years_list %}
+                            <a href="?{% url_replace year=y_val page=None %}" class="block px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg flex justify-between items-center group">
+                                {{ y_label }}
+                                {% if request.GET.year == y_val %}<i class="fa-solid fa-check text-xs"></i>{% endif %}
+                            </a>
+                            {% endfor %}
+                            {% if request.GET.year %}
+                            <div class="border-t border-slate-700 mt-1 pt-1"><a href="?{% url_replace year=None page=None %}" class="block py-2 text-xs text-red-400 text-center">Réinitialiser</a></div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <button 
+                            @click="openFilter = (openFilter === 'genre' ? null : 'genre')"
+                            class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2"
+                            :class="{'bg-blue-600 text-white border-blue-600': '{{ request.GET.genre }}' || openFilter === 'genre', 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500': !'{{ request.GET.genre }}' && openFilter !== 'genre'}"
+                        >
+                            <i class="fa-solid fa-masks-theater text-xs"></i>
+                            {% if request.GET.genre %}{{ request.GET.genre }}{% else %}Genre{% endif %}
+                        </button>
+
+                        <div x-show="openFilter === 'genre'" 
+                            x-transition class="absolute top-full left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1 overflow-hidden" 
+                            style="display: none;">
+                            <div class="max-h-60 overflow-y-auto custom-scrollbar">
+                                {% for g in genres_list %}
+                                <a href="?{% url_replace genre=g page=None %}" class="block px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg transition-colors flex justify-between items-center group">
+                                    {{ g }}
+                                    {% if request.GET.genre == g %}<i class="fa-solid fa-check text-xs"></i>{% endif %}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            {% if request.GET.genre %}
+                            <div class="border-t border-slate-700 mt-1 pt-1"><a href="?{% url_replace genre=None page=None %}" class="block py-2 text-xs text-red-400 hover:text-red-300 text-center">Réinitialiser</a></div>
                             {% endif %}
                         </div>
                     </div>
@@ -145,32 +189,23 @@
                             :class="{'bg-blue-600 text-white border-blue-600': '{{ request.GET.platform }}' || openFilter === 'platform', 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500': !'{{ request.GET.platform }}' && openFilter !== 'platform'}"
                         >
                             <i class="fa-solid fa-gamepad text-xs"></i>
-                            {% if request.GET.platform %}{{ request.GET.platform }}
-                            {% else %}Plateforme{% endif %}
+                            {% if request.GET.platform %}{{ request.GET.platform }}{% else %}Plateforme{% endif %}
                         </button>
 
                         <div x-show="openFilter === 'platform'" 
-                            x-transition
-                            class="absolute top-full left-0 md:left-auto md:right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1 overflow-hidden" 
+                            x-transition 
+                            class="absolute top-full right-0 md:left-auto md:right-0 md:translate-x-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1 overflow-hidden" 
                             style="display: none;">
-                            
                             <div class="max-h-60 overflow-y-auto custom-scrollbar">
                                 {% for plat in platforms_list %}
                                 <a href="?{% url_replace platform=plat page=None %}" class="block px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg transition-colors flex justify-between items-center group">
                                     {{ plat }}
-                                    {% if request.GET.platform == plat %}
-                                    <i class="fa-solid fa-check text-xs"></i>
-                                    {% endif %}
+                                    {% if request.GET.platform == plat %}<i class="fa-solid fa-check text-xs"></i>{% endif %}
                                 </a>
                                 {% endfor %}
                             </div>
-
                             {% if request.GET.platform %}
-                            <div class="border-t border-slate-700 mt-1 pt-1">
-                                <a href="?{% url_replace platform=None page=None %}" class="block px-3 py-2 text-xs text-red-400 hover:text-red-300 text-center">
-                                    Réinitialiser
-                                </a>
-                            </div>
+                            <div class="border-t border-slate-700 mt-1 pt-1"><a href="?{% url_replace platform=None page=None %}" class="block px-3 py-2 text-xs text-red-400 hover:text-red-300 text-center">Réinitialiser</a></div>
                             {% endif %}
                         </div>
                     </div>
@@ -279,55 +314,71 @@
                     </div>
                 </div>
 
-                <div class="mt-auto pt-4">
+                <div class="mt-auto pt-4 flex flex-col gap-2">
     
-                    {# CAS 1 : Prix PC trouvé (Cheapshark) #}
+                    {# --- LOGIQUE : PRIX PC (CheapShark) --- #}
+                    {# On l'affiche SI : (Il y a un prix) ET (Pas de filtre OU Filtre contient PC/Mac/Linux) #}
                     {% if game.price_current is not None %}
-                        <a href="https://www.cheapshark.com/search#q:{{ game.title|urlencode }}" 
+                        {% if not request.GET.platform or "PC" in request.GET.platform or "Mac" in request.GET.platform or "Linux" in request.GET.platform %}
+                        <a href="https://www.cheapshark.com/search#q:{{ game.title|cut:':'|urlencode }}" 
                         target="_blank" 
                         @click.stop
-                        class="group/btn relative w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-3 rounded-xl transition-all duration-200 shadow-md overflow-hidden">
+                        class="group/btn relative w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-2.5 rounded-xl transition-all duration-200 shadow-md overflow-hidden">
                             <span class="relative z-10 flex items-center gap-2">
-                                <i class="fa-solid fa-cart-shopping"></i>
-                                Voir l'offre <span class="text-blue-200 text-xs ml-1">({{game.price_current}}€)</span>
+                                <i class="fa-solid fa-desktop text-sm"></i>
+                                <span class="text-sm">PC / Mac</span> 
+                                <span class="bg-blue-800/50 px-2 py-0.5 rounded text-xs text-blue-100 ml-1">{{game.price_current}}€</span>
                             </span>
                         </a>
+                        {% endif %}
+                    {% endif %}
 
-                    {# CAS 2 : Nintendo (Switch, Wii U, 3DS...) #}
-                    {% elif "Nintendo Switch" in game.platforms or "Wii U" in game.platforms or "Nintendo 3DS" in game.platforms %}
+                    {# --- LOGIQUE : NINTENDO --- #}
+                    {# On l'affiche SI : (Jeu Switch) ET (Pas de filtre OU Filtre = Nintendo) #}
+                    {% if "Nintendo Switch" in game.platforms or "Wii U" in game.platforms or "Nintendo 3DS" in game.platforms %}
+                        {% if not request.GET.platform or "Nintendo" in request.GET.platform %}
                         <a href="https://www.nintendo.com/fr-fr/Rechercher/Rechercher-299117.html?q={{ game.title|urlencode }}" 
                         target="_blank"
                         @click.stop
-                        class="group/btn w-full flex items-center justify-center gap-2 bg-[#e60012] hover:bg-[#ff0019] text-white font-bold py-3 rounded-xl transition-all shadow-md">
-                            <i class="fa-solid fa-gamepad"></i>
-                            Voir sur Nintendo eShop
+                        class="group/btn w-full flex items-center justify-center gap-2 bg-[#e60012] hover:bg-[#ff0019] text-white font-bold py-2.5 rounded-xl transition-all shadow-md">
+                            <i class="fa-solid fa-gamepad text-sm"></i>
+                            <span class="text-sm">eShop</span>
                         </a>
+                        {% endif %}
+                    {% endif %}
 
-                    {# CAS 3 : PlayStation (PS5, PS4, PS3, Vita...) #}
-                    {% elif "PlayStation 5" in game.platforms or "PlayStation 4" in game.platforms or "PlayStation 3" in game.platforms %}
+                    {# --- LOGIQUE : PLAYSTATION --- #}
+                    {% if "PlayStation 5" in game.platforms or "PlayStation 4" in game.platforms or "PlayStation 3" in game.platforms %}
+                        {% if not request.GET.platform or "PlayStation" in request.GET.platform %}
                         <a href="https://store.playstation.com/fr-fr/search/{{ game.title|urlencode }}" 
                         target="_blank"
                         @click.stop
-                        class="group/btn w-full flex items-center justify-center gap-2 bg-[#00439c] hover:bg-[#005bc4] text-white font-bold py-3 rounded-xl transition-all shadow-md">
-                            <i class="fa-brands fa-playstation"></i>
-                            Voir sur PS Store
+                        class="group/btn w-full flex items-center justify-center gap-2 bg-[#00439c] hover:bg-[#005bc4] text-white font-bold py-2.5 rounded-xl transition-all shadow-md">
+                            <i class="fa-brands fa-playstation text-sm"></i>
+                            <span class="text-sm">PS Store</span>
                         </a>
+                        {% endif %}
+                    {% endif %}
 
-                    {# CAS 4 : Xbox (Series, One, 360...) #}
-                    {% elif "Xbox Series X|S" in game.platforms or "Xbox One" in game.platforms or "Xbox 360" in game.platforms %}
+                    {# --- LOGIQUE : XBOX --- #}
+                    {% if "Xbox Series X|S" in game.platforms or "Xbox One" in game.platforms or "Xbox 360" in game.platforms %}
+                        {% if not request.GET.platform or "Xbox" in request.GET.platform %}
                         <a href="https://www.xbox.com/fr-fr/search?q={{ game.title|urlencode }}" 
                         target="_blank"
                         @click.stop
-                        class="group/btn w-full flex items-center justify-center gap-2 bg-[#107c10] hover:bg-[#159415] text-white font-bold py-3 rounded-xl transition-all shadow-md">
-                            <i class="fa-brands fa-xbox"></i>
-                            Voir sur Xbox Store
+                        class="group/btn w-full flex items-center justify-center gap-2 bg-[#107c10] hover:bg-[#159415] text-white font-bold py-2.5 rounded-xl transition-all shadow-md">
+                            <i class="fa-brands fa-xbox text-sm"></i>
+                            <span class="text-sm">Xbox Store</span>
                         </a>
+                        {% endif %}
+                    {% endif %}
 
-                    {# CAS 5 : Offre introuvable #}
-                    {% else %}
-                        <button disabled class="w-full flex items-center justify-center gap-2 bg-slate-800 text-slate-500 font-bold py-3 rounded-xl cursor-not-allowed border border-slate-700">
-                            <i class="fa-solid fa-ban"></i>
-                            Offre non disponible
+                    {# --- FALLBACK : Si vraiment rien n'est affiché --- #}
+                    {# C'est un peu complexe à détecter en pur template, donc on met un bouton gris générique si pas de prix PC et pas de consoles majeures #}
+                    {% if game.price_current is None and "Nintendo Switch" not in game.platforms and "PlayStation 5" not in game.platforms and "PlayStation 4" not in game.platforms and "Xbox Series X|S" not in game.platforms and "Xbox One" not in game.platforms %}
+                        <button disabled class="w-full flex items-center justify-center gap-2 bg-slate-800 text-slate-500 font-bold py-2.5 rounded-xl cursor-not-allowed border border-slate-700">
+                            <i class="fa-solid fa-ban text-sm"></i>
+                            <span class="text-sm">Non disponible</span>
                         </button>
                     {% endif %}
 

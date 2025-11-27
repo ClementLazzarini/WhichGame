@@ -14,6 +14,8 @@ class HomeListView(ListView):
         price = self.request.GET.get('price')
         duration = self.request.GET.get('duration')
         platform = self.request.GET.get('platform')
+        genre = self.request.GET.get('genre')    # NOUVEAU
+        year = self.request.GET.get('year')
         search = self.request.GET.get('search')
 
         # 1. Barre de Recherche (Recherche dans le titre OU le slug)
@@ -46,6 +48,21 @@ class HomeListView(ListView):
             # Comme platforms est une liste JSON ["PC", "PS5"], on utilise 'icontains'
             # pour voir si le mot existe dans la liste.
             queryset = queryset.filter(platforms__icontains=platform)
+        
+        # 5. Filtre Genre (JSONField)
+        if genre:
+            queryset = queryset.filter(genres__icontains=genre)
+
+        # 6. Filtre Année
+        if year:
+            try:
+                if year == 'retro':
+                    queryset = queryset.filter(release_year__lt=2010)
+                else:
+                    year_val = int(year)
+                    queryset = queryset.filter(release_year__gte=year_val)
+            except ValueError:
+                pass
 
         return queryset.order_by('-rating') # On trie par note par défaut
     
@@ -58,5 +75,22 @@ class HomeListView(ListView):
             "PlayStation 5", "PlayStation 4", 
             "Xbox Series X|S", "Xbox One", 
             "Nintendo Switch"
+        ]
+
+        # Liste des genres populaires (Statique pour MVP)
+        context['genres_list'] = [
+            "Role-playing (RPG)", "Adventure", "Shooter", 
+            "Platform", "Puzzle", "Strategy", "Indie", 
+            "Sport", "Racing", "Fighting", "Simulator"
+        ]
+        
+        # Format : (valeur_url, etiquette_affichage)
+        context['years_list'] = [
+            ('2024', '2024 - 2025'),
+            ('2023', 'Après 2023'),
+            ('2020', 'Après 2020'),
+            ('2015', 'Après 2015'),
+            ('2010', 'Après 2010'),
+            ('retro', 'Rétro (Avant 2010)')
         ]
         return context

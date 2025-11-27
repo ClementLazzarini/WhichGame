@@ -1,179 +1,101 @@
 import requests
-import re
+import os
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from decouple import config
 from whichgame.models import Game
-from difflib import SequenceMatcher
 
 class Command(BaseCommand):
-    help = 'Import V10 : Temps en Cascade + Prix au plus court'
-
-    def add_arguments(self, parser):
-        parser.add_argument('--offset', type=int, default=0)
-        parser.add_argument('--limit', type=int, default=50)
+    help = 'LAYER 1 : Import IGDB avec mémoire (State File)'
 
     def handle(self, *args, **options):
-        offset = options['offset']
-        limit = options['limit']
+        # 1. Gestion de l'Offset via fichier texte
+        state_file = os.path.join(settings.BASE_DIR, 'igdb_import.state')
+        offset = 0
+        limit = 50
         
-        # 1. AUTH IGDB
+        if os.path.exists(state_file):
+            with open(state_file, 'r') as f:
+                try:
+                    offset = int(f.read().strip())
+                except ValueError:
+                    offset = 0
+
+        self.stdout.write(f"🚀 Démarrage Import IGDB (Offset : {offset})")
+
+        # 2. Auth IGDB
         client_id = config('IGDB_CLIENT_ID')
         client_secret = config('IGDB_CLIENT_SECRET')
-        
         try:
             auth = requests.post("https://id.twitch.tv/oauth2/token", params={
                 'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'
             }).json()
             access_token = auth['access_token']
         except Exception as e:
-            self.stdout.write(self.style.ERROR(f"❌ Erreur Auth : {e}"))
+            self.stdout.write(self.style.ERROR(f"❌ Erreur Auth: {e}"))
             return
 
         headers = {'Client-ID': client_id, 'Authorization': f'Bearer {access_token}'}
 
-        # ---------------------------------------------------------
-        # ÉTAPE 1 : Récupérer les JEUX
-        # ---------------------------------------------------------
-        url_games = "https://api.igdb.com/v4/games"
-        body_games = f"""
-            fields name, slug, rating, cover.url, platforms.name, genres.name, release_dates.y; 
-            sort rating_count desc; 
-            limit {limit}; 
-            offset {offset};
-        """
-        
-        self.stdout.write(f"📡 Récupération des jeux (Offset {offset})...")
-        response_games = requests.post(url_games, headers=headers, data=body_games)
-        games_data = response_games.json()
+        # 3. Récupération Jeux
+        body_games = f"fields name, slug, rating, cover.url, platforms.name, genres.name, release_dates.y; sort rating_count desc; limit {limit}; offset {offset};"
+        games_data = requests.post("https://api.igdb.com/v4/games", headers=headers, data=body_games).json()
 
-        if not games_data or 'status' in games_data: 
-            self.stdout.write(self.style.ERROR(f"❌ Erreur Jeux: {games_data}"))
+        if not games_data or 'status' in games_data:
+            self.stdout.write(self.style.WARNING("⚠️ Fin de liste ou erreur. Reset de l'offset à 0."))
+            # On remet à 0 pour la prochaine fois
+            with open(state_file, 'w') as f: 
+                f.write("0")
             return
 
+        # 4. Récupération Temps (IGDB)
         game_ids = [g['id'] for g in games_data]
         ids_string = ",".join(map(str, game_ids))
-
-        # ---------------------------------------------------------
-        # ÉTAPE 2 : Récupérer les TEMPS (AVEC CASCADE)
-        # ---------------------------------------------------------
-        url_times = "https://api.igdb.com/v4/game_time_to_beats"
         
-        # On demande les 3 types de temps
-        body_times = f"""
-            fields game_id, hastily, normally, completely; 
-            where game_id = ({ids_string});
-            limit 500; 
-        """
+        body_times = f"fields game_id, hastily, normally, completely; where game_id = ({ids_string}); limit 500;"
+        times_data = requests.post("https://api.igdb.com/v4/game_time_to_beats", headers=headers, data=body_times).json()
         
-        self.stdout.write(f"⏱️  Récupération des temps de jeu...")
-        response_times = requests.post(url_times, headers=headers, data=body_times)
-        times_data = response_times.json()
-
         times_map = {}
         if isinstance(times_data, list):
             for t in times_data:
-                gid = t['game_id']
-                seconds = 0
-                
-                # --- LOGIQUE DE CASCADE (Priorité : Rapide > Normal > Complet) ---
-                if t.get('hastily', 0) > 0:
-                    seconds = t['hastily']
-                elif t.get('normally', 0) > 0:
-                    seconds = t['normally']
-                elif t.get('completely', 0) > 0:
-                    seconds = t['completely']
-                
+                # Logique cascade
+                seconds = t.get('hastily') or t.get('normally') or t.get('completely') or 0
                 if seconds > 0:
-                    hours = round(seconds / 3600)
-                    # Si c'est un jeu très court (ex: 10 min), on met au moins 1h pour l'affichage
-                    if hours == 0 and seconds > 0:
-                        hours = 1
-                    
-                    times_map[gid] = hours
+                    times_map[t['game_id']] = round(seconds / 3600) or 1
 
-        # ---------------------------------------------------------
-        # ÉTAPE 3 : Fusion
-        # ---------------------------------------------------------
-        self.stdout.write(f"📦 Traitement de {len(games_data)} jeux...")
-
+        # 5. Sauvegarde BDD
+        count = 0
         for data in games_data:
-            if 'name' not in data: continue 
-            game_name = data['name']
-            game_id = data['id']
+            if 'name' not in data: 
+                continue
             
-            # --- PLATEFORMES ---
-            platforms = [p['name'] for p in data.get('platforms', [])]
-            is_pc = any(x in ['PC (Microsoft Windows)', 'Mac', 'Linux'] for x in platforms)
-
-            # --- PRIX (CheapShark) ---
-            price = None
-            if is_pc:
-                price = self.get_best_price(game_name)
-
-            # --- ANNÉE ---
-            release_year = None
-            if 'release_dates' in data:
-                years = [d['y'] for d in data['release_dates'] if 'y' in d]
-                if years: release_year = min(years)
-
-            # --- TEMPS DE JEU ---
-            playtime_hours = times_map.get(game_id, 0)
-
-            # --- IMAGE ---
             cover_url = ""
             if 'cover' in data and 'url' in data['cover']:
                 cover_url = data['cover']['url'].replace('t_thumb', 't_cover_big')
-                if cover_url.startswith('//'): cover_url = f"https:{cover_url}"
+                if cover_url.startswith('//'): 
+                    cover_url = f"https:{cover_url}"
 
-            # --- SAUVEGARDE ---
-            try:
-                game, created = Game.objects.update_or_create(
-                    igdb_id=game_id,
-                    defaults={
-                        'title': game_name,
-                        'slug': data['slug'],
-                        'rating': data.get('rating'),
-                        'cover_url': cover_url,
-                        'platforms': platforms,
-                        'genres': [g['name'] for g in data.get('genres', [])],
-                        'price_current': price,
-                        'playtime_main': playtime_hours,
-                        'release_year': release_year
-                    }
-                )
-                
-                p_str = f"{price}€" if price is not None else "-"
-                t_str = f"{playtime_hours}h" if playtime_hours > 0 else "-"
-                icon = "✨" if created else "🆗"
-                
-                self.stdout.write(f"{icon} {game.title[:25]:<25} | {p_str:<6} | {t_str}")
-
-            except Exception as e:
-                self.stdout.write(f"Err BDD: {e}")
-
-    def clean(self, name):
-        """Ne garde que chiffres et lettres minuscules"""
-        return re.sub(r'[^a-z0-9]', '', name.lower())
-
-    def get_best_price(self, game_name):
-        try:
-            url = f"https://www.cheapshark.com/api/1.0/games?title={game_name}&limit=10"
-            res = requests.get(url, timeout=3).json()
-            if not res: return None
-
-            clean_game = self.clean(game_name)
-            candidates = []
+            platform_names = [p['name'] for p in data.get('platforms', [])]
             
-            for r in res:
-                clean_shark = self.clean(r['external'])
-                # Match Exact OU Inclusion
-                if clean_game == clean_shark or clean_game in clean_shark:
-                    candidates.append(r)
-            
-            if candidates:
-                # REVERT : On prend le nom le plus court (ex: Mass Effect 2 > Mass Effect 2 Digital Edition)
-                best_match = min(candidates, key=lambda x: len(x['external']))
-                return float(best_match['cheapest'])
-            
-            return None
-        except: return None
+            Game.objects.update_or_create(
+                igdb_id=data['id'],
+                defaults={
+                    'title': data['name'],
+                    'slug': data['slug'],
+                    'rating': data.get('rating'),
+                    'cover_url': cover_url,
+                    'platforms': platform_names,
+                    'genres': [g['name'] for g in data.get('genres', [])],
+                    'playtime_main': times_map.get(data['id'], 0),
+                    'release_year': min([d['y'] for d in data.get('release_dates', []) if 'y' in d], default=None)
+                }
+            )
+            count += 1
+
+        self.stdout.write(self.style.SUCCESS(f"✅ {count} jeux traités."))
+
+        # 6. Mise à jour de l'offset pour le prochain tour
+        new_offset = offset + limit
+        with open(state_file, 'w') as f:
+            f.write(str(new_offset))
+        self.stdout.write(f"💾 Prochain démarrage prévu à l'offset : {new_offset}")
