@@ -1,42 +1,84 @@
 {% load static %}
-{% load my_filters %}
-{% load tailwind_tags %} <!DOCTYPE html>
-<html lang="fr">
+{% load tailwind_tags %} 
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}WhichGame{% endblock %}</title>
+    
+    <title>{% block title %}WhichGame - Trouve ta prochaine pépite{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Ne perdez plus de temps à chercher. Trouvez les meilleurs jeux vidéo selon votre budget, votre temps de jeu et vos plateformes (PC, PS5, Switch, Xbox).{% endblock %}">
+    <meta name="author" content="Clément Lazzarini">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}"/>
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://whichgame.pythonanywhere.com/"> <meta property="og:title" content="WhichGame - Le comparateur de jeux malin">
+    <meta property="og:description" content="Moins de 20€ ? Moins de 10h ? Trouve ton prochain jeu maintenant.">
+    <meta property="og:image" content="{% static 'images/og-image.jpg' %}"> <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://whichgame.pythonanywhere.com/">
+    <meta property="twitter:title" content="WhichGame - Trouve ta prochaine pépite">
+    <meta property="twitter:description" content="Moins de 20€ ? Moins de 10h ? Trouve ton prochain jeu maintenant.">
+    <meta property="twitter:image" content="{% static 'images/og-image.jpg' %}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    keyframes: {
-                        shimmer: { '100%': { transform: 'translateX(200%) skewX(12deg)' } }
-                    }
-                }
-            }
-        }
-    </script>
+    {% tailwind_css %}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-    
-    {% tailwind_css %} 
+
+    <style>
+        /* Police par défaut */
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Anti-flicker pour AlpineJS */
+        [x-cloak] { display: none !important; }
+
+        /* Animation Shimmer (Effet brillant sur les boutons) */
+        @keyframes shimmer {
+            100% { transform: translateX(200%) skewX(12deg); }
+        }
+
+        /* Scrollbar personnalisée (Chrome/Safari/Edge) */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; } /* slate-900 */
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; } /* slate-700 */
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; } /* slate-600 */
+    </style>
 </head>
-<body class="text-slate-100 font-sans min-h-screen flex flex-col">
 
-    {% block content %}
+<body class="text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
-    {% endblock %}
-
-    <footer class="w-full bg-gray-800 text-white text-center p-4 mt-auto">
-        {% block footer %}
-        &copy; 2024 WhichGame. Tous droits réservés.
+    <div class="flex-grow">
+        {% block content %}
         {% endblock %}
+    </div>
+
+    <footer class="border-t border-slate-800 mt-16 py-10 bg-slate-950 text-center relative z-10">
+        <div class="container mx-auto px-4">
+            <p class="text-slate-500 text-sm mb-6 flex items-center justify-center gap-2">
+                &copy; 2025 WhichGame. Fait avec <i class="fa-solid fa-heart text-red-500 animate-pulse"></i> et Django.
+            </p>
+            
+            <div class="flex flex-wrap justify-center gap-6 text-sm font-medium">
+                <a href="{% url 'about' %}" class="text-slate-400 hover:text-white transition-colors duration-200 hover:underline decoration-blue-500 underline-offset-4">
+                    À propos
+                </a>
+                <span class="text-slate-700 hidden sm:inline">•</span>
+                <a href="{% url 'legal' %}" class="text-slate-400 hover:text-white transition-colors duration-200 hover:underline decoration-blue-500 underline-offset-4">
+                    Mentions Légales
+                </a>
+                <span class="text-slate-700 hidden sm:inline">•</span>
+                <a href="https://github.com/ClementLazzarini" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors duration-200 flex items-center gap-2 hover:underline decoration-blue-500 underline-offset-4">
+                    <i class="fa-brands fa-github text-lg"></i> GitHub
+                </a>
+            </div>
+        </div>
     </footer>
 
     {% block extra_js %}
     {% endblock extra_js %}
+
 </body>
 </html>

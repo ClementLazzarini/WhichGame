@@ -16,7 +16,7 @@ Django==5.2.8
 django-tailwind==4.4.1
 fake-useragent==2.2.0
 frozenlist==1.8.0
-howlongtobeatpy==1.0.18
+howlongtobeatpy==1.0.19
 idna==3.11
 Jinja2==3.1.6
 markdown-it-py==4.0.0

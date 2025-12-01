@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header class="sticky top-0 z-50 w-full bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 py-4 shadow-md">
+    <div class="container mx-auto px-4 md:px-6 flex items-center justify-between">
+        <a href="{% url 'home_list' %}" class="text-2xl font-black tracking-tight text-white hover:opacity-80 transition-opacity">
+            WhichGame<span class="text-blue-500">.</span>
+        </a>
+
+        <a href="{% url 'home_list' %}" class="text-sm font-bold text-slate-300 hover:text-white flex items-center gap-2 transition-colors px-4 py-2 rounded-full hover:bg-slate-800">
+            <i class="fa-solid fa-arrow-left"></i> Retour aux jeux
+        </a>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 py-16 max-w-3xl text-center h-max">
+    <h1 class="text-4xl text-black font-black mb-6">À propos de <span class="text-blue-500">WhichGame.</span></h1>
+    
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-8 shadow-xl text-left space-y-4 text-slate-300 leading-relaxed">
+        <p>
+            <strong class="text-lg text-white">Le problème :</strong> On passe parfois plus de temps à chercher un jeu qu'à y jouer. Trop de choix, des prix qui varient, et des durées de vie inconnues.
+        </p>
+        <p>
+            <strong class="text-lg text-white">La solution :</strong> WhichGame est un agrégateur simplifié conçu pour répondre à une question simple : <em>"À quoi je joue ce soir pour moins de 20€ et qui dure moins de 10h ?"</em>.
+        </p>
+        <hr class="border-slate-700 my-4">
+        <p class="text-sm italic text-slate-400">
+            Ce projet est un MVP (Minimum Viable Product) développé avec passion en utilisant Django et Tailwind CSS. Les données proviennent de IGDB (infos), CheapShark (prix PC) et HowLongToBeat (durées).
+        </p>
+        <div class="pt-4 text-center">
+            <a href="{% url 'home_list' %}" class="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-colors">
+                Trouver un jeu
+            </a>
+        </div>
+    </div>
+</main>
+{% endblock %}

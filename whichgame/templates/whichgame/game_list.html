@@ -315,9 +315,7 @@
                 </div>
 
                 <div class="mt-auto pt-4 flex flex-col gap-2">
-    
-                    {# --- LOGIQUE : PRIX PC (CheapShark) --- #}
-                    {# On l'affiche SI : (Il y a un prix) ET (Pas de filtre OU Filtre contient PC/Mac/Linux) #}
+                    {# --- LOGIQUE : PC / MAC / LINUX --- #}
                     {% if game.price_current is not None %}
                         {% if not request.GET.platform or "PC" in request.GET.platform or "Mac" in request.GET.platform or "Linux" in request.GET.platform %}
                         <a href="https://www.cheapshark.com/search#q:{{ game.title|cut:':'|urlencode }}" 
@@ -334,7 +332,6 @@
                     {% endif %}
 
                     {# --- LOGIQUE : NINTENDO --- #}
-                    {# On l'affiche SI : (Jeu Switch) ET (Pas de filtre OU Filtre = Nintendo) #}
                     {% if "Nintendo Switch" in game.platforms or "Wii U" in game.platforms or "Nintendo 3DS" in game.platforms %}
                         {% if not request.GET.platform or "Nintendo" in request.GET.platform %}
                         <a href="https://www.nintendo.com/fr-fr/Rechercher/Rechercher-299117.html?q={{ game.title|urlencode }}" 

@@ -18,10 +18,14 @@ from django.contrib import admin
 from . import settings
 from django.conf.urls.static import static
 from django.urls import path, include
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('', include('whichgame.urls')),
     path('admin/', admin.site.urls),
+    path('about/', TemplateView.as_view(template_name="about.html"), name='about'),
+    path('legal/', TemplateView.as_view(template_name="legal.html"), name='legal'),
+    path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
 ]
 
 if settings.DEBUG:
