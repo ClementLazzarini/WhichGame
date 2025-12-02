@@ -59,7 +59,14 @@ class Command(BaseCommand):
                 if found_time > 0:
                     game.playtime_main = found_time
                     game.save()
-                    self.stdout.write(f"   ✅ {game.title[:20]}... : Mis à jour -> {found_time}h")
+                    
+                    # DEBUG : Relecture immédiate pour vérifier l'écriture
+                    game.refresh_from_db()
+                    if game.playtime_main == found_time:
+                         self.stdout.write(f"   ✅ {game.title}... : Mis à jour -> {found_time}h (Confirmé BDD)")
+                    else:
+                         self.stdout.write(self.style.ERROR(f"   💀 {game.title}... : ECHEC ECRITURE ! Lu: {game.playtime_main}"))
+                         
                 else:
                     self.stdout.write(self.style.WARNING(f"   ⚠️ {game.title[:20]}... : Pas trouvé"))
 

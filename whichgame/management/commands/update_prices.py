@@ -50,12 +50,14 @@ class Command(BaseCommand):
                         break # On sort de la boucle immédiatement
                     
                     if found_price is not None:
-                        game.price_current = found_price
+                        game.price_current = (found_price)
                         game.save()
                         self.stdout.write(f"   ✅ {game.title}: {found_price}€")
                     
-                    # PAUSE OBLIGATOIRE ENTRE CHAQUE JEU (0.5 sec)
-                    # 50 jeux prendront 25 secondes. C'est lent, mais sûr.
+                    else:
+                        self.stdout.write(f"   ❌ {game.title}: Pas de prix trouvé (Code: {status_code})")
+                    
+                    # Petite pause pour éviter le ban
                     time.sleep(0.5) 
 
                 except Exception as e:
@@ -100,7 +102,7 @@ class Command(BaseCommand):
             clean_game = self.clean(game_name)
             candidates = []
             
-            for r in res:
+            for r in results:
                 clean_shark = self.clean(r['external'])
                 if clean_game == clean_shark or clean_game in clean_shark:
                     candidates.append(r)
