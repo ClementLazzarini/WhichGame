@@ -83,7 +83,8 @@ class Command(BaseCommand):
         
         try:
             times_data = requests.post("https://api.igdb.com/v4/game_time_to_beats", headers=headers, data=body_times).json()
-        except:
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"❌ Erreur API Temps: {e}"))
             times_data = []
         
         times_map = {}
