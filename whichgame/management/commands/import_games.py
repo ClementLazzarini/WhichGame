@@ -5,9 +5,6 @@ from django.conf import settings
 from decouple import config
 from whichgame.models import Game
 
-os.environ["http_proxy"] = "http://proxy.server:3128"
-os.environ["https_proxy"] = "http://proxy.server:3128"
-
 class Command(BaseCommand):
     help = 'LAYER 1 : Import IGDB avec mémoire (State File)'
 
