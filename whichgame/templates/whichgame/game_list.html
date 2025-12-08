@@ -74,8 +74,8 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
                 <div class="h-6 w-px bg-slate-700 hidden sm:block mx-1"></div>
 
                 <div class="flex flex-wrap gap-2 items-center justify-center">
-                    
-                    <div class="relative"> 
+    
+                    <div class="relative group"> 
                         <button 
                             @click="openFilter = (openFilter === 'price' ? null : 'price')"
                             class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2"
@@ -84,6 +84,14 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
                             <i class="fa-solid fa-coins text-xs"></i>
                             {% if request.GET.price %}Max {{ request.GET.price }}€{% else %}Budget{% endif %}
                         </button>
+
+                        <div 
+                            class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 bg-slate-900 border border-slate-600 text-white text-[10px] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none hidden md:block z-[60]"
+                            x-show="openFilter !== 'price'"
+                        >
+                            Définir un prix maximum
+                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-l border-t border-slate-600 transform rotate-45"></div>
+                        </div>
 
                         <div x-show="openFilter === 'price'"
                             x-transition
@@ -121,7 +129,7 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
                         </div>
                     </div>
 
-                    <div class="relative">
+                    <div class="relative group">
                         <button 
                             @click="openFilter = (openFilter === 'duration' ? null : 'duration')"
                             class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2"
@@ -133,6 +141,15 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
                             {% elif request.GET.duration == 'long' %}+ 30h
                             {% else %}Durée{% endif %}
                         </button>
+
+                        <div 
+                            class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 bg-slate-900 border border-slate-600 text-white text-[10px] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none hidden md:block z-[60]"
+                            x-show="openFilter !== 'duration'"
+                        >
+                            Temps de jeu (Main story)
+                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-l border-t border-slate-600 transform rotate-45"></div>
+                        </div>
+
                         <div x-show="openFilter === 'duration'" 
                             x-transition class="absolute top-full left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1" 
                             style="display: none;">
@@ -145,7 +162,7 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
                         </div>
                     </div>
 
-                    <div class="relative">
+                    <div class="relative group">
                         <button 
                             @click="openFilter = (openFilter === 'year' ? null : 'year')"
                             class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2"
@@ -158,6 +175,14 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
                                 {% endfor %}
                             {% else %}Sortie{% endif %}
                         </button>
+
+                        <div 
+                            class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 bg-slate-900 border border-slate-600 text-white text-[10px] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none hidden md:block z-[60]"
+                            x-show="openFilter !== 'year'"
+                        >
+                            Année de sortie
+                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-l border-t border-slate-600 transform rotate-45"></div>
+                        </div>
 
                         <div x-show="openFilter === 'year'" 
                                 x-transition 
@@ -175,7 +200,7 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
                         </div>
                     </div>
 
-                    <div class="relative">
+                    <div class="relative group">
                         <button 
                             @click="openFilter = (openFilter === 'genre' ? null : 'genre')"
                             class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2"
@@ -184,6 +209,14 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
                             <i class="fa-solid fa-masks-theater text-xs"></i>
                             {% if request.GET.genre %}{{ request.GET.genre }}{% else %}Genre{% endif %}
                         </button>
+
+                        <div 
+                            class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 bg-slate-900 border border-slate-600 text-white text-[10px] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none hidden md:block z-[60]"
+                            x-show="openFilter !== 'genre'"
+                        >
+                            RPG, Action, Aventure...
+                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-l border-t border-slate-600 transform rotate-45"></div>
+                        </div>
 
                         <div x-show="openFilter === 'genre'" 
                             x-transition class="absolute top-full left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1 overflow-hidden" 
@@ -202,7 +235,7 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
                         </div>
                     </div>
 
-                    <div class="relative">
+                    <div class="relative group">
                         <button 
                             @click="openFilter = (openFilter === 'platform' ? null : 'platform')"
                             class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2"
@@ -211,6 +244,14 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
                             <i class="fa-solid fa-gamepad text-xs"></i>
                             {% if request.GET.platform %}{{ request.GET.platform }}{% else %}Plateforme{% endif %}
                         </button>
+
+                        <div 
+                            class="absolute top-full right-0 md:left-1/2 md:-translate-x-1/2 mt-2 w-max px-2 py-1 bg-slate-900 border border-slate-600 text-white text-[10px] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none hidden md:block z-[60]"
+                            x-show="openFilter !== 'platform'"
+                        >
+                            PC, Switch, PS5...
+                            <div class="absolute -top-1 right-4 md:right-auto md:left-1/2 md:-translate-x-1/2 w-2 h-2 bg-slate-900 border-l border-t border-slate-600 transform rotate-45"></div>
+                        </div>
 
                         <div x-show="openFilter === 'platform'" 
                             x-transition 
