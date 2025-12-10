@@ -128,7 +128,7 @@ class Command(BaseCommand):
                         'platforms': platform_names,
                         'genres': [g['name'] for g in data.get('genres', [])],
                         'playtime_main': times_map.get(data['id'], 0),
-                        # On prend l'année la plus ancienne (date de sortie originale)
+                        'game_type': data.get('game_type', 0),
                         'release_year': min([d['y'] for d in data.get('release_dates', []) if 'y' in d], default=None)
                     }
                 )
