@@ -12,6 +12,7 @@ class Game(models.Model):
     playtime_main = models.IntegerField(null=True, blank=True, db_index=True)
     release_year = models.IntegerField(null=True, blank=True, db_index=True)
     game_type = models.IntegerField(default=0)
+    remake_slug = models.CharField(max_length=255, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True) 
     
     def __str__(self):

@@ -392,6 +392,14 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
                 </div>
 
                 <div class="mt-auto pt-4 flex flex-col gap-2">
+                    {% if game.remake_slug %}
+                    <a href="{% url 'home_list' %}?search={{ game.remake_slug }}" 
+                       @click.stop
+                       class="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl transition-all shadow-md mb-2 border border-purple-400/30">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                        <span class="text-sm">Voir la version récente</span>
+                    </a>
+                    {% endif %}
                     {# --- LOGIQUE : PC / MAC / LINUX --- #}
                     {% if game.price_current is not None %}
                         {% if not request.GET.platform or "PC" in request.GET.platform or "Mac" in request.GET.platform or "Linux" in request.GET.platform %}
