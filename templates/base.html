@@ -24,6 +24,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="canonical" href="https://www.whichgame.app{{ request.path }}" />
 
     {% tailwind_css %}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -46,6 +47,8 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; } /* slate-700 */
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; } /* slate-600 */
     </style>
+    {% block extra_head %}
+    {% endblock %}
 </head>
 
 <body class="text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
@@ -55,13 +58,86 @@
         {% endblock %}
     </div>
 
-    <footer class="border-t border-slate-800 mt-16 py-10 bg-slate-950 text-center relative z-10">
+    <footer class="border-t border-slate-800 mt-16 bg-slate-950 text-center relative z-10 pt-12">
         <div class="container mx-auto px-4">
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12 text-left">
+                <div>
+                    <h3 class="text-white font-bold mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-piggy-bank text-purple-500"></i> Budgets
+                    </h3>
+                    <ul class="space-y-2 text-sm">
+                        <li>
+                            <a href="{% url 'home_list' %}?price_max=5" class="text-slate-400 hover:text-purple-400 transition-colors">Moins de 5€</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'home_list' %}?price_max=15" class="text-slate-400 hover:text-purple-400 transition-colors">Moins de 15€</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'home_list' %}?price_max=30" class="text-slate-400 hover:text-purple-400 transition-colors">Moins de 30€</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-clock text-cyan-500"></i> Durée
+                    </h3>
+                    <ul class="space-y-2 text-sm">
+                        <li>
+                            <a href="{% url 'home_list' %}?playtime_max=5" class="text-slate-400 hover:text-cyan-400 transition-colors">Soirée (Moins de 5h)</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'home_list' %}?playtime_min=10&playtime_max=30" class="text-slate-400 hover:text-cyan-400 transition-colors">Week-end (10-30h)</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'home_list' %}?playtime_min=50" class="text-slate-400 hover:text-cyan-400 transition-colors">Longue Aventure (+50h)</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-star text-yellow-500"></i> Incontournables
+                    </h3>
+                    <ul class="space-y-2 text-sm">
+                        <li>
+                            <a href="{% url 'home_list' %}?rating_min=90" class="text-slate-400 hover:text-yellow-400 transition-colors">Chefs d'œuvre (90+)</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'home_list' %}?rating_min=80&price_max=20" class="text-slate-400 hover:text-yellow-400 transition-colors">Excellents & Pas chers</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'home_list' %}?year_min=2023" class="text-slate-400 hover:text-yellow-400 transition-colors">Sorties Récentes</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-pink-500"></i> Versions
+                    </h3>
+                    <ul class="space-y-2 text-sm">
+                        <li>
+                            <a href="{% url 'home_list' %}?search=Remake" class="text-slate-400 hover:text-pink-400 transition-colors">Les Remakes</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'home_list' %}?search=Remaster" class="text-slate-400 hover:text-pink-400 transition-colors">Les Remasters</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'home_list' %}?platform=PC" class="text-slate-400 hover:text-pink-400 transition-colors">Jeux PC</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800/50 my-8"></div>
+
             <p class="text-slate-500 text-sm mb-6 flex items-center justify-center gap-2">
-                &copy; 2025 WhichGame. Fait avec <i class="fa-solid fa-heart text-red-500 animate-pulse"></i> et Django.
+                &copy; 2025 WhichGame.
             </p>
             
-            <div class="flex flex-wrap justify-center gap-6 text-sm font-medium">
+            <div class="flex flex-wrap justify-center gap-6 text-sm font-medium mb-10">
                 <a href="{% url 'about' %}" class="text-slate-400 hover:text-white transition-colors duration-200 hover:underline decoration-blue-500 underline-offset-4">
                     À propos
                 </a>
@@ -73,6 +149,17 @@
                 <a href="https://github.com/ClementLazzarini" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors duration-200 flex items-center gap-2 hover:underline decoration-blue-500 underline-offset-4">
                     <i class="fa-brands fa-github text-lg"></i> GitHub
                 </a>
+            </div>
+        </div>
+
+        <div class="border-t border-slate-900 bg-slate-900/50 py-6">
+            <div class="max-w-6xl mx-auto px-4 text-center">
+                <p class="text-xs text-slate-500">
+                    Site réalisé avec <i class="fa-solid fa-heart text-red-500 animate-pulse"></i> par 
+                    <a href="https://www.clementlazzarini.com/" class="font-bold text-slate-400 hover:text-fuchsia-500 transition-colors" target="_blank">
+                        Clément
+                    </a>
+                </p>
             </div>
         </div>
     </footer>
