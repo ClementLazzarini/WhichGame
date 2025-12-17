@@ -39,5 +39,8 @@ logs/
 .env
 .env.*
 
-#Fichiers d'états pour les commandes custom
+# Fichiers d'états pour les commandes custom
 *.state
+
+# Token Twitch IGDB
+twitch_token.json

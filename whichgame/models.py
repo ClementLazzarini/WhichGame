@@ -14,6 +14,8 @@ class Game(models.Model):
     game_type = models.IntegerField(default=0)
     remake_slug = models.CharField(max_length=255, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True) 
+    video_id = models.CharField(max_length=50, null=True, blank=True)
+    screenshots = models.JSONField(default=list, blank=True)
     
     def __str__(self):
         return self.title
