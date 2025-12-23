@@ -46,6 +46,16 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; } /* slate-900 */
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; } /* slate-700 */
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; } /* slate-600 */
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .animate-heartbeat {
+            animation: heartbeat 0.3s ease-in-out;
+        }
     </style>
     {% block extra_head %}
     {% endblock %}
@@ -163,6 +173,35 @@
             </div>
         </div>
     </footer>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('wishlist', {
+                items: JSON.parse(localStorage.getItem('whichgame_wishlist') || '[]'),
+                
+                toggle(id) {
+                    if (this.items.includes(id)) {
+                        this.items = this.items.filter(i => i !== id);
+                    } else {
+                        this.items.push(id);
+                    }
+                    localStorage.setItem('whichgame_wishlist', JSON.stringify(this.items));
+                },
+                
+                has(id) {
+                    return this.items.includes(id);
+                },
+                
+                count() {
+                    return this.items.length;
+                },
+
+                getUrl() {
+                    if (this.items.length === 0) return '#';
+                    return "{% url 'home_list' %}?wishlist_ids=" + this.items.join(',');
+                }
+            });
+        });
+    </script>
 
     {% block extra_js %}
     {% endblock extra_js %}

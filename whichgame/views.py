@@ -14,9 +14,10 @@ class HomeListView(ListView):
         price = self.request.GET.get('price')
         duration = self.request.GET.get('duration')
         platform = self.request.GET.get('platform')
-        genre = self.request.GET.get('genre')    # NOUVEAU
+        genre = self.request.GET.get('genre')
         year = self.request.GET.get('year')
         search = self.request.GET.get('search')
+        wishlist_ids = self.request.GET.get('wishlist_ids')
 
         # 1. Barre de Recherche (Recherche dans le titre OU le slug)
         if search:
@@ -61,6 +62,14 @@ class HomeListView(ListView):
                 else:
                     year_val = int(year)
                     queryset = queryset.filter(release_year__gte=year_val)
+            except ValueError:
+                pass
+        
+       
+        if wishlist_ids:
+            try:
+                ids_list = [int(id) for id in wishlist_ids.split(',')]
+                queryset = queryset.filter(id__in=ids_list)
             except ValueError:
                 pass
 
