@@ -14,8 +14,8 @@ class Command(BaseCommand):
         parser.add_argument(
             '--limit',
             type=int,
-            default=200,
-            help='Nombre de jeux à importer (défaut: 200)'
+            default=500,
+            help='Nombre de jeux à importer (défaut: 500)'
         )
 
     def handle(self, *args, **options):
