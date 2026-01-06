@@ -78,13 +78,13 @@
                     </h3>
                     <ul class="space-y-2 text-sm">
                         <li>
-                            <a href="{% url 'home_list' %}?price_max=5" class="text-slate-400 hover:text-purple-400 transition-colors">Moins de 5€</a>
+                            <a href="{% url 'game_list' %}?price_max=5" class="text-slate-400 hover:text-purple-400 transition-colors">Moins de 5€</a>
                         </li>
                         <li>
-                            <a href="{% url 'home_list' %}?price_max=15" class="text-slate-400 hover:text-purple-400 transition-colors">Moins de 15€</a>
+                            <a href="{% url 'game_list' %}?price_max=15" class="text-slate-400 hover:text-purple-400 transition-colors">Moins de 15€</a>
                         </li>
                         <li>
-                            <a href="{% url 'home_list' %}?price_max=30" class="text-slate-400 hover:text-purple-400 transition-colors">Moins de 30€</a>
+                            <a href="{% url 'game_list' %}?price_max=30" class="text-slate-400 hover:text-purple-400 transition-colors">Moins de 30€</a>
                         </li>
                     </ul>
                 </div>
@@ -95,13 +95,13 @@
                     </h3>
                     <ul class="space-y-2 text-sm">
                         <li>
-                            <a href="{% url 'home_list' %}?playtime_max=5" class="text-slate-400 hover:text-cyan-400 transition-colors">Soirée (Moins de 5h)</a>
+                            <a href="{% url 'game_list' %}?playtime_max=5" class="text-slate-400 hover:text-cyan-400 transition-colors">Soirée (Moins de 5h)</a>
                         </li>
                         <li>
-                            <a href="{% url 'home_list' %}?playtime_min=10&playtime_max=30" class="text-slate-400 hover:text-cyan-400 transition-colors">Week-end (10-30h)</a>
+                            <a href="{% url 'game_list' %}?playtime_min=10&playtime_max=30" class="text-slate-400 hover:text-cyan-400 transition-colors">Week-end (10-30h)</a>
                         </li>
                         <li>
-                            <a href="{% url 'home_list' %}?playtime_min=50" class="text-slate-400 hover:text-cyan-400 transition-colors">Longue Aventure (+50h)</a>
+                            <a href="{% url 'game_list' %}?playtime_min=50" class="text-slate-400 hover:text-cyan-400 transition-colors">Longue Aventure (+50h)</a>
                         </li>
                     </ul>
                 </div>
@@ -112,13 +112,13 @@
                     </h3>
                     <ul class="space-y-2 text-sm">
                         <li>
-                            <a href="{% url 'home_list' %}?rating_min=90" class="text-slate-400 hover:text-yellow-400 transition-colors">Chefs d'œuvre (90+)</a>
+                            <a href="{% url 'game_list' %}?rating_min=90" class="text-slate-400 hover:text-yellow-400 transition-colors">Chefs d'œuvre (90+)</a>
                         </li>
                         <li>
-                            <a href="{% url 'home_list' %}?rating_min=80&price_max=20" class="text-slate-400 hover:text-yellow-400 transition-colors">Excellents & Pas chers</a>
+                            <a href="{% url 'game_list' %}?rating_min=80&price_max=20" class="text-slate-400 hover:text-yellow-400 transition-colors">Excellents & Pas chers</a>
                         </li>
                         <li>
-                            <a href="{% url 'home_list' %}?year_min=2023" class="text-slate-400 hover:text-yellow-400 transition-colors">Sorties Récentes</a>
+                            <a href="{% url 'game_list' %}?year_min=2023" class="text-slate-400 hover:text-yellow-400 transition-colors">Sorties Récentes</a>
                         </li>
                     </ul>
                 </div>
@@ -129,13 +129,13 @@
                     </h3>
                     <ul class="space-y-2 text-sm">
                         <li>
-                            <a href="{% url 'home_list' %}?search=Remake" class="text-slate-400 hover:text-pink-400 transition-colors">Les Remakes</a>
+                            <a href="{% url 'game_list' %}?search=Remake" class="text-slate-400 hover:text-pink-400 transition-colors">Les Remakes</a>
                         </li>
                         <li>
-                            <a href="{% url 'home_list' %}?search=Remaster" class="text-slate-400 hover:text-pink-400 transition-colors">Les Remasters</a>
+                            <a href="{% url 'game_list' %}?search=Remaster" class="text-slate-400 hover:text-pink-400 transition-colors">Les Remasters</a>
                         </li>
                         <li>
-                            <a href="{% url 'home_list' %}?platform=PC" class="text-slate-400 hover:text-pink-400 transition-colors">Jeux PC</a>
+                            <a href="{% url 'game_list' %}?platform=PC" class="text-slate-400 hover:text-pink-400 transition-colors">Jeux PC</a>
                         </li>
                     </ul>
                 </div>
@@ -197,7 +197,7 @@
 
                 getUrl() {
                     if (this.items.length === 0) return '#';
-                    return "{% url 'home_list' %}?wishlist_ids=" + this.items.join(',');
+                    return "{% url 'game_list' %}?wishlist_ids=" + this.items.join(',');
                 }
             });
         });

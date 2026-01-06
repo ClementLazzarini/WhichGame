@@ -1,7 +1,8 @@
 # views.py
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 from django.db.models import Q
 from .models import Game 
+import datetime
 
 class HomeListView(ListView):
     model = Game
@@ -95,11 +96,49 @@ class HomeListView(ListView):
         
         # Format : (valeur_url, etiquette_affichage)
         context['years_list'] = [
-            ('2024', '2024 - 2025'),
-            ('2023', 'Après 2023'),
+            ('2025', '2025 - 2026'),
+            ('2024', 'Après 2024'),
             ('2020', 'Après 2020'),
             ('2015', 'Après 2015'),
             ('2010', 'Après 2010'),
             ('retro', 'Rétro (Avant 2010)')
         ]
+        return context
+
+
+class HomeView(TemplateView):
+    template_name = "home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        base_qs = Game.objects.filter(
+            rating__isnull=False, 
+            cover_url__isnull=False
+        ).exclude(cover_url="")
+
+        # 1. LES INCONTOURNABLES (Note > 90)
+        context['top_rated'] = base_qs.filter(rating__gte=90).order_by('-rating')[:4]
+
+        # 2. LES DERNIÈRES PÉPITES (Sortis en 2024-2025 avec bonne note)
+        current_year = datetime.date.today().year
+        context['new_releases'] = base_qs.filter(
+            release_year__gte=current_year-1, 
+            rating__gte=80
+        ).order_by('-release_year', '-rating')[:4]
+
+        # 3. PETITS BUDGETS (Moins de 10€ et > 80 de note)
+        context['budget_gems'] = base_qs.filter(
+            price_current__lt=10, 
+            price_current__gt=0,
+            rating__gte=80
+        ).order_by('-rating')[:4]
+
+        # 4. COURTES AVENTURES (Moins de 8h et > 85 de note)
+        context['short_games'] = base_qs.filter(
+            playtime_main__lte=8,
+            playtime_main__gt=0,
+            rating__gte=85
+        ).order_by('-rating')[:4]
+
         return context

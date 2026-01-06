@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% load static %} 
+{% load my_filters %} 
+
+{% block title %}WhichGame - Trouvez votre prochaine aventure{% endblock %}
+
+{% block meta_description %}
+Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu et de votre plateforme. Comparateur intelligent.
+{% endblock %}
+
+{% block content %}
+<header 
+    class="sticky top-0 z-50 w-full bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 py-4 shadow-md transition-all duration-300"
+    x-data="{ mobileMenu: false, searchFocused: false }" 
+    @click.outside="mobileMenu = false"
+>
+    <div class="container mx-auto px-4 md:px-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            
+            <div class="flex items-center gap-4">
+                <a href="{% url 'home' %}" class="text-2xl font-black tracking-tight text-white hover:opacity-80 transition-opacity">
+                    WhichGame<span class="text-blue-500">.</span>
+                </a>
+                <p class="text-sm text-slate-400 font-medium hidden md:block border-l border-slate-700 pl-4">
+                    Trouvez votre prochaine aventure
+                </p>
+            </div>
+
+            <button 
+                @click="mobileMenu = !mobileMenu"
+                class="md:hidden p-2 text-slate-300 hover:text-white bg-slate-800 rounded-lg border border-slate-700 focus:outline-none"
+                aria-label="Menu"
+            >
+                <i class="fa-solid" :class="mobileMenu ? 'fa-xmark' : 'fa-bars'"></i>
+            </button>
+
+            <div 
+                class="w-full md:w-auto md:flex items-center gap-4 transition-all duration-300 ease-in-out"
+                :class="mobileMenu ? 'block border-t border-slate-800 pt-4 mt-2' : 'hidden'"
+            >
+                
+                <a :href="$store.wishlist.getUrl()"
+                   x-show="$store.wishlist.count() > 0"
+                   x-transition
+                   class="mb-3 md:mb-0 w-full md:w-auto btn-filter transition-all duration-300 px-4 py-2 rounded-full border text-sm font-bold flex items-center justify-center gap-2 bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500 hover:text-white hover:border-red-500"
+                >
+                    <i class="fa-solid fa-heart"></i>
+                    <span x-text="'Ma Liste'"></span>
+                </a>
+
+                <form action="{% url 'game_list' %}" method="GET" class="relative group w-full md:w-72">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-search text-slate-500 group-focus-within:text-blue-500 transition-colors"></i>
+                    </div>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        placeholder="Chercher un jeu..." 
+                        class="block w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-inner"
+                    >
+                </form>
+
+                <a href="{% url 'game_list' %}" class="md:hidden mt-3 w-full text-center block px-4 py-2 bg-slate-800 text-slate-300 rounded-xl border border-slate-700 font-bold">
+                    Tout le catalogue
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="relative h-[calc(100vh-73px)] bg-slate-900 overflow-hidden flex flex-col justify-center items-center border-b border-slate-800">
+    
+    <div class="absolute inset-0">
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-20 blur-sm"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/90 to-slate-900/60"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-transparent to-slate-900/80"></div>
+    </div>
+
+    <div class="relative container mx-auto px-4 z-10 text-center flex flex-col items-center">
+        
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider mb-6 animate-fade-in-up">
+            🚀 Déjà 8 000+ jeux référencés
+        </div>
+
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white mb-6 drop-shadow-2xl">
+            Commencez<br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">à jouer.</span>
+        </h1>
+        
+        <p class="mt-2 text-lg md:text-2xl text-slate-300 max-w-2xl mx-auto leading-relaxed font-light">
+            Arrêtez de scroller. Trouvez la pépite parfaite en fonction de votre temps et de votre budget.
+        </p>
+        
+        <div class="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <a href="{% url 'game_list' %}" class="group px-8 py-4 bg-white text-slate-900 font-black rounded-full transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center gap-2">
+                Explorer le catalogue
+                <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+            </a>
+            <a href="#selection" class="px-8 py-4 bg-slate-800/50 hover:bg-slate-800 text-white font-bold rounded-full border border-slate-700 hover:border-slate-500 transition-all backdrop-blur-sm">
+                Voir les sélections
+            </a>
+        </div>
+    </div>
+
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-slate-500 animate-bounce cursor-pointer">
+        <a href="#selection" aria-label="Descendre">
+            <i class="fa-solid fa-chevron-down text-3xl opacity-50 hover:opacity-100 transition-opacity"></i>
+        </a>
+    </div>
+</div>
+
+<div id="selection" class="bg-slate-950">
+    <div class="container mx-auto px-4 py-24 space-y-32">
+
+        <section class="relative">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4 border-l-4 border-yellow-500 pl-6">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-black text-white flex items-center gap-3">
+                        Les Incontournables
+                    </h2>
+                    <p class="text-slate-400 mt-2 text-lg">La crème de la crème. Note minimum : <span class="text-yellow-500 font-bold">90/100</span>.</p>
+                </div>
+                <a href="{% url 'game_list' %}?rating=90" class="group flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 hover:border-yellow-500/50">
+                    Voir le classement complet <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform text-yellow-500"></i>
+                </a>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {% for game in top_rated %}
+                    {% include "includes/mini_card.html" %}
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="relative">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4 border-l-4 border-green-500 pl-6">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-black text-white">
+                        Moins de 10€
+                    </h2>
+                    <p class="text-slate-400 mt-2 text-lg">Excellents jeux qui respectent votre portefeuille.</p>
+                </div>
+                <a href="{% url 'game_list' %}?price=10" class="group flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 hover:border-green-500/50">
+                    Voir les bons plans <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform text-green-500"></i>
+                </a>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {% for game in budget_gems %}
+                    {% include "includes/mini_card.html" %}
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="relative">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4 border-l-4 border-purple-500 pl-6">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-black text-white">
+                        Sorties Récentes
+                    </h2>
+                    <p class="text-slate-400 mt-2 text-lg">Les pépites sorties en 2024 et 2025.</p>
+                </div>
+                <a href="{% url 'game_list' %}?year=2024" class="group flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 hover:border-purple-500/50">
+                    Voir les nouveautés <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform text-purple-500"></i>
+                </a>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {% for game in new_releases %}
+                    {% include "includes/mini_card.html" %}
+                {% endfor %}
+            </div>
+        </section>
+
+    </div>
+
+    <div class="bg-slate-900 py-16 text-center border-t border-slate-800">
+        <h3 class="text-2xl font-bold text-white mb-4">Pas trouvé votre bonheur ?</h3>
+        <p class="text-slate-400 mb-8">Utilisez nos filtres avancés pour trier parmi plus de 8000 titres.</p>
+        <a href="{% url 'game_list' %}" class="inline-block px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-blue-600/20">
+            Lancer une recherche avancée
+        </a>
+    </div>
+</div>
+{% endblock %}

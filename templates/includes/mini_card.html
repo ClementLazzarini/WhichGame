@@ -1,0 +1,28 @@
+<a href="{% url 'game_list' %}?search={{ game.title }}" class="group relative block bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700 hover:border-blue-500/50 hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-1">
+    <div class="aspect-[3/4] w-full relative overflow-hidden">
+        <img src="{{ game.cover_url }}" alt="{{ game.title }}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
+        
+        <div class="absolute top-2 right-2">
+            <span class="flex items-center gap-1 bg-black/60 backdrop-blur-md text-green-400 text-xs font-bold px-2 py-1 rounded-full border border-white/10">
+                <i class="fa-solid fa-star text-[10px]"></i> {{ game.rating }}
+            </span>
+        </div>
+    </div>
+
+    <div class="p-3">
+        <h3 class="font-bold text-white text-sm truncate">{{ game.title }}</h3>
+        <div class="flex justify-between items-center mt-2 text-xs">
+            <span class="text-slate-400 flex items-center gap-1">
+                <i class="fa-regular fa-clock"></i> {{ game.playtime_main }}h
+            </span>
+            {% if game.price_current == 0 %}
+                <span class="text-green-400 font-bold">Gratuit</span>
+            {% elif game.price_current %}
+                <span class="text-blue-300 font-bold">{{ game.price_current }}€</span>
+            {% else %}
+                <span class="text-slate-600">-€</span>
+            {% endif %}
+        </div>
+    </div>
+</a>
