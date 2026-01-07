@@ -20,7 +20,6 @@ build/
 *.egg-info/
 
 # --- Fichiers Django ---
-# La base de données de développement. Ne JAMAIS la pusher !
 db.sqlite3
 *.sqlite3
 

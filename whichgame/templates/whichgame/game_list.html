@@ -322,6 +322,14 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
                        :class="$store.wishlist.has({{ game.id }}) ? 'fa-solid text-red-500 animate-heartbeat' : 'fa-regular text-white'">
                     </i>
                 </button>
+                {% if request.user.is_superuser %}
+                <form action="{% url 'delete_game' game.id %}" method="POST" onsubmit="return confirm('Supprimer {{ game.title|escapejs }} définitivement ?');" class="absolute top-2 left-12 z-30">
+                    {% csrf_token %}
+                    <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-full bg-red-600/80 hover:bg-red-600 text-white shadow-lg backdrop-blur-md transition-all hover:scale-110 border border-red-400">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                </form>
+                {% endif %}
                 <img src="{{ game.cover_url }}" 
                      alt="Jaquette du jeu vidéo {{game.title}}" 
                      loading="lazy"
