@@ -31,6 +31,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=lambda v: [s.s
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -137,3 +138,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Tailwind Settings
 TAILWIND_APP_NAME = 'theme'
 INTERNAL_IPS = ["127.0.0.1"]
+
+
+JAZZMIN_SETTINGS = {
+    "site_title": "WhichGame Admin",
+    "site_header": "WhichGame",
+    "site_brand": "WhichGame",
+    "welcome_sign": "Bienvenue sur WhichGame",
+    "search_model": "whichgame.Game",
+    "user_avatar": None,
+    "topmenu_links": [
+        {"name": "Voir le site",  "url": "home", "permissions": ["auth.view_user"]},
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "whichgame.Game": "fas fa-gamepad",
+    },
+}

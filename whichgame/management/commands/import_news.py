@@ -1,19 +1,20 @@
 import requests
 import os
 import json
-import time # Nécessaire pour le timestamp actuel
+import time
+from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from decouple import config
 from whichgame.models import Game
 
 class Command(BaseCommand):
-    help = 'LAYER 2 : Import des NOUVEAUTÉS (Sorties passées uniquement + Temps de jeu)'
+    help = 'LAYER 2 : Import NOUVEAUTÉS (Seulement les jeux Hype ou Notés)'
 
     def handle(self, *args, **options):
-        self.stdout.write("🔥 Démarrage Import NEWS (Dernières sorties réelles)...")
+        self.stdout.write("🔥 Démarrage Import NEWS Qualitatif...")
 
-        # 1. AUTH IGDB (Avec Cache Intelligent pour éviter le ban)
+        # 1. AUTH IGDB
         token_file = os.path.join(settings.BASE_DIR, 'twitch_token.json')
         access_token = None
         client_id = config('IGDB_CLIENT_ID')
@@ -23,9 +24,9 @@ class Command(BaseCommand):
             try:
                 with open(token_file, 'r') as f:
                     data = json.load(f)
-                    if data.get('expires_at') > time.time() + 60:
+                    if data.get('expires_at') > time.time() + 60: 
                         access_token = data.get('access_token')
-            except Exception: 
+            except:  # noqa: E722
                 pass
 
         if not access_token:
@@ -33,10 +34,7 @@ class Command(BaseCommand):
                 auth = requests.post("https://id.twitch.tv/oauth2/token", params={
                     'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'
                 }).json()
-                access_token = auth.get('access_token')
-                if not access_token: 
-                    return
-                
+                access_token = auth['access_token']
                 with open(token_file, 'w') as f:
                     json.dump({'access_token': access_token, 'expires_at': time.time() + auth['expires_in']}, f)
             except Exception: 
@@ -44,14 +42,18 @@ class Command(BaseCommand):
 
         headers = {'Client-ID': client_id, 'Authorization': f'Bearer {access_token}'}
 
-        # 2. REQUÊTE JEUX (Filtre anti-futur)
-        current_timestamp = int(time.time()) # L'heure actuelle en secondes UNIX
+        # 2. REQUÊTE : Jeux sortis les 60 derniers jours
+        # On ne limite pas à 20, on en prend 100 et on trie nous-même
+        timestamp_now = int(time.time())
+        timestamp_past = int((datetime.now() - timedelta(days=60)).timestamp())
         
-        fields = "fields name, slug, rating, cover.url, platforms.name, genres.name, release_dates.y, game_type, videos.video_id, screenshots.url, first_release_date;"
+        # On ajoute 'hypes' et les nouveaux champs du model
+        fields = "fields name, slug, rating, total_rating_count, hypes, summary, cover.url, platforms.name, genres.name, themes.name, first_release_date, release_dates.y, game_type, videos.video_id, screenshots.url"
         
-        # AJOUT DU FILTRE : first_release_date <= current_timestamp
-        # Cela exclut les jeux qui ne sont pas encore sortis
-        body = f"{fields} where game_type = (0, 8, 9) & cover != null & first_release_date != null & first_release_date <= {current_timestamp}; sort first_release_date desc; limit 20;"
+        # Filtre : Sortis récemment ET (Avoir une note OU de la Hype)
+        # Note: IGDB ne permet pas facilement le OR dans le where sur des champs différents, 
+        # donc on filtre large ici et on affine en Python.
+        body = f"{fields}; where game_type = (0, 8, 9) & cover != null & first_release_date > {timestamp_past} & first_release_date <= {timestamp_now}; sort first_release_date desc; limit 100;"
 
         try:
             response = requests.post("https://api.igdb.com/v4/games", headers=headers, data=body)
@@ -61,67 +63,56 @@ class Command(BaseCommand):
             return
 
         if not games_data:
-            self.stdout.write(self.style.WARNING("⚠️ Aucun jeu trouvé."))
+            self.stdout.write(self.style.WARNING("⚠️ Aucun jeu récent trouvé."))
             return
 
-        # 3. RÉCUPÉRATION DES TEMPS DE JEU (HLTB)
-        # On doit le faire aussi ici pour éviter le "Noneh"
+        # 3. HLTB
         game_ids = [g['id'] for g in games_data]
         ids_string = ",".join(map(str, game_ids))
-        
-        body_times = f"fields game_id, hastily, normally, completely; where game_id = ({ids_string}); limit 100;"
-        
-        try:
-            response_time = requests.post("https://api.igdb.com/v4/game_time_to_beats", headers=headers, data=body_times)
-            times_data = response_time.json()
-        except Exception:
-            times_data = [] 
-        
         times_map = {}
-        if isinstance(times_data, list):
-            for t in times_data:
-                seconds = t.get('hastily') or t.get('normally') or t.get('completely') or 0
-                if seconds > 0:
-                    hours = round(seconds / 3600)
-                    times_map[t['game_id']] = max(1, hours) # Min 1h
+        try:
+            body_t = f"fields game_id, hastily, normally, completely; where game_id = ({ids_string}); limit 500;"
+            resp_t = requests.post("https://api.igdb.com/v4/game_time_to_beats", headers=headers, data=body_t)
+            for t in resp_t.json():
+                s = t.get('hastily') or t.get('normally') or t.get('completely') or 0
+                if s > 0: 
+                    times_map[t['game_id']] = max(1, round(s / 3600))
+        except:  # noqa: E722
+            pass
 
-        # 4. SAUVEGARDE
+        # 4. SAUVEGARDE FILTRÉE
         count = 0
+        ignored = 0
+        
         for data in games_data:
-            if 'name' not in data: 
-                continue
+            # --- LE GARDEN KEEPER (FILTRE INTELLIGENT) ---
+            rating_count = data.get('total_rating_count', 0)
+            hypes = data.get('hypes', 0)
             
-            # --- Traitement Images ---
+            # CRITÈRE : Soit > 5 avis (Jeu validé), Soit > 5 Hypes (Jeu attendu)
+            if rating_count < 5 and hypes < 5:
+                ignored += 1
+                # self.stdout.write(f"   🗑️ Ignoré (Trop obscur): {data['name']}")
+                continue
+
+            # --- Mapping ---
+            r_date = None
+            if 'first_release_date' in data:
+                r_date = datetime.fromtimestamp(data['first_release_date']).date()
+
             cover_url = ""
             if 'cover' in data and 'url' in data['cover']:
                 cover_url = data['cover']['url'].replace('t_thumb', 't_cover_big')
                 if cover_url.startswith('//'): 
                     cover_url = f"https:{cover_url}"
-            
-            # --- Traitement Vidéos ---
+
             vid_id = None
-            if 'videos' in data and data['videos']:
-                for v in data['videos']:
-                    if 'video_id' in v:
-                        vid_id = v['video_id']
-                        break
+            if 'videos' in data:
+                vid_id = next((v['video_id'] for v in data['videos'] if 'video_id' in v), None)
 
-            # --- Traitement Screenshots ---
-            screens_list = []
+            screens = []
             if 'screenshots' in data:
-                for sc in data['screenshots'][:3]: 
-                    if 'url' in sc:
-                        url = sc['url'].replace('t_thumb', 't_1080p') 
-                        if url.startswith('//'): 
-                            url = f"https:{url}"
-                        screens_list.append(url)
-
-            platform_names = [p['name'] for p in data.get('platforms', [])]
-            
-            # --- Gestion du temps ---
-            # Si on a trouvé un temps HLTB, on l'utilise.
-            # Sinon, on met 0 (pour afficher "TBD" ou rien, plutôt que de planter).
-            playtime = times_map.get(data['id'], 0)
+                screens = [s['url'].replace('t_thumb', 't_1080p').replace('//', 'https://') for s in data['screenshots'][:3] if 'url' in s]
 
             try:
                 Game.objects.update_or_create(
@@ -130,19 +121,23 @@ class Command(BaseCommand):
                         'title': data['name'],
                         'slug': data['slug'],
                         'rating': data.get('rating'),
+                        'total_rating_count': rating_count,
+                        'summary': data.get('summary', ''),
                         'cover_url': cover_url,
-                        'platforms': platform_names,
+                        'platforms': [p['name'] for p in data.get('platforms', [])],
                         'genres': [g['name'] for g in data.get('genres', [])],
-                        'playtime_main': playtime,
+                        'themes': [t['name'] for t in data.get('themes', [])],
+                        'playtime_main': times_map.get(data['id'], 0),
                         'game_type': data.get('game_type', 0),
                         'release_year': min([d['y'] for d in data.get('release_dates', []) if 'y' in d], default=None),
+                        'first_release_date': r_date,
                         'video_id': vid_id,
-                        'screenshots': screens_list
+                        'screenshots': screens
                     }
                 )
                 count += 1
-                self.stdout.write(f"   Updated/Created: {data['name']} ({playtime}h)")
+                self.stdout.write(f"   ✅ NEWS: {data['name']} (Hype: {hypes} | Avis: {rating_count})")
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f"Erreur save {data['name']}: {e}"))
+                self.stdout.write(self.style.ERROR(f"Erreur: {e}"))
 
-        self.stdout.write(self.style.SUCCESS(f"✅ Terminé : {count} jeux actualisés (News)."))
+        self.stdout.write(self.style.SUCCESS(f"🏁 Terminé. {count} nouveautés ajoutées. {ignored} poubelles évitées."))
