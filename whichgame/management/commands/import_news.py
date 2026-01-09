@@ -9,9 +9,25 @@ from decouple import config
 from whichgame.models import Game
 
 class Command(BaseCommand):
-    help = 'LAYER 2 : Import NOUVEAUTÉS (Seulement les jeux Hype ou Notés)'
+    help = 'LAYER 2 : Import NOUVEAUTÉS (Seulement les 1 et 15 du mois, sauf si --force)'
+
+    def add_arguments(self, parser):
+        # Ajout de l'argument pour forcer l'exécution manuelle
+        parser.add_argument(
+            '--force',
+            action='store_true',
+            help='Forcer l\'exécution même si on n\'est pas le 1er ou le 15'
+        )
 
     def handle(self, *args, **options):
+        # --- 0. VÉRIFICATION DE LA DATE ---
+        today = datetime.now().day
+        
+        # Si on n'est ni le 1, ni le 15, ET qu'on n'a pas mis --force
+        if today not in [1, 15] and not options['force']:
+            self.stdout.write(self.style.WARNING(f"📅 Nous sommes le {today}. Script programmé pour les 1 et 15 uniquement. Arrêt."))
+            return
+
         self.stdout.write("🔥 Démarrage Import NEWS Qualitatif...")
 
         # 1. AUTH IGDB
@@ -34,7 +50,9 @@ class Command(BaseCommand):
                 auth = requests.post("https://id.twitch.tv/oauth2/token", params={
                     'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'
                 }).json()
-                access_token = auth['access_token']
+                access_token = auth.get('access_token') # Utilisation de .get() plus sûr
+                if not access_token:
+                    return
                 with open(token_file, 'w') as f:
                     json.dump({'access_token': access_token, 'expires_at': time.time() + auth['expires_in']}, f)
             except Exception: 
@@ -43,16 +61,11 @@ class Command(BaseCommand):
         headers = {'Client-ID': client_id, 'Authorization': f'Bearer {access_token}'}
 
         # 2. REQUÊTE : Jeux sortis les 60 derniers jours
-        # On ne limite pas à 20, on en prend 100 et on trie nous-même
         timestamp_now = int(time.time())
         timestamp_past = int((datetime.now() - timedelta(days=60)).timestamp())
         
-        # On ajoute 'hypes' et les nouveaux champs du model
         fields = "fields name, slug, rating, total_rating_count, hypes, summary, cover.url, platforms.name, genres.name, themes.name, first_release_date, release_dates.y, game_type, videos.video_id, screenshots.url"
         
-        # Filtre : Sortis récemment ET (Avoir une note OU de la Hype)
-        # Note: IGDB ne permet pas facilement le OR dans le where sur des champs différents, 
-        # donc on filtre large ici et on affine en Python.
         body = f"{fields}; where game_type = (0, 8, 9) & cover != null & first_release_date > {timestamp_past} & first_release_date <= {timestamp_now}; sort first_release_date desc; limit 100;"
 
         try:
@@ -76,7 +89,11 @@ class Command(BaseCommand):
             for t in resp_t.json():
                 s = t.get('hastily') or t.get('normally') or t.get('completely') or 0
                 if s > 0: 
-                    times_map[t['game_id']] = max(1, round(s / 3600))
+                    # --- AJOUT PLAFOND ANTI-BUG ---
+                    hours = round(s / 3600)
+                    if hours > 500: 
+                        hours = 500
+                    times_map[t['game_id']] = max(1, hours)
         except:  # noqa: E722
             pass
 
@@ -85,17 +102,13 @@ class Command(BaseCommand):
         ignored = 0
         
         for data in games_data:
-            # --- LE GARDEN KEEPER (FILTRE INTELLIGENT) ---
             rating_count = data.get('total_rating_count', 0)
             hypes = data.get('hypes', 0)
             
-            # CRITÈRE : Soit > 5 avis (Jeu validé), Soit > 5 Hypes (Jeu attendu)
             if rating_count < 5 and hypes < 5:
                 ignored += 1
-                # self.stdout.write(f"   🗑️ Ignoré (Trop obscur): {data['name']}")
                 continue
 
-            # --- Mapping ---
             r_date = None
             if 'first_release_date' in data:
                 r_date = datetime.fromtimestamp(data['first_release_date']).date()

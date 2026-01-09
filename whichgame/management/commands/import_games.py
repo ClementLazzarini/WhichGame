@@ -98,6 +98,13 @@ class Command(BaseCommand):
                 ignored += 1
                 continue 
 
+            # --- FILTRE ANTI WEB BROWSER  ---
+            current_platform_names = [p['name'] for p in data.get('platforms', [])]
+            
+            if "Web Browser" in current_platform_names:
+                ignored += 1
+                continue
+
             # Traitement Date précise
             r_date = None
             if 'first_release_date' in data:
