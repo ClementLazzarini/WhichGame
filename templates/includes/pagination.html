@@ -1,0 +1,36 @@
+{% load static %} 
+{% load my_filters %} 
+
+<div class="mt-12 flex justify-center pb-8">
+    <nav class="isolate inline-flex -space-x-px rounded-xl shadow-lg bg-slate-900 p-1 border border-slate-800">
+        
+        {% if page_obj.has_previous %}
+        <a href="?{% url_replace page=page_obj.previous_page_number %}" 
+        class="relative inline-flex items-center rounded-l-lg px-3 py-2 text-slate-400 ring-1 ring-inset ring-slate-800 hover:bg-purple-600 hover:text-white hover:ring-purple-600 focus:z-20 focus:outline-offset-0 transition-all duration-200">
+            <span class="sr-only">Précédent</span>
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+        </a>
+        {% else %}
+        <span class="relative inline-flex items-center rounded-l-lg px-3 py-2 text-slate-700 ring-1 ring-inset ring-slate-800 cursor-not-allowed bg-slate-900/50">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+        </span>
+        {% endif %}
+
+        <span class="relative inline-flex items-center px-6 py-2 text-sm font-bold text-slate-200 ring-1 ring-inset ring-slate-800 focus:outline-offset-0 bg-slate-800/50">
+            Page <span class="text-purple-400 mx-1">{{ page_obj.number }}</span> sur <span class="text-slate-500 mx-1">{{ page_obj.paginator.num_pages }}</span>
+        </span>
+
+        {% if page_obj.has_next %}
+        <a href="?{% url_replace page=page_obj.next_page_number %}" 
+        class="relative inline-flex items-center rounded-r-lg px-3 py-2 text-slate-400 ring-1 ring-inset ring-slate-800 hover:bg-purple-600 hover:text-white hover:ring-purple-600 focus:z-20 focus:outline-offset-0 transition-all duration-200">
+            <span class="sr-only">Suivant</span>
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+        </a>
+        {% else %}
+        <span class="relative inline-flex items-center rounded-r-lg px-3 py-2 text-slate-700 ring-1 ring-inset ring-slate-800 cursor-not-allowed bg-slate-900/50">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+        </span>
+        {% endif %}
+        
+    </nav>
+</div>

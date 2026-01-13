@@ -1,0 +1,37 @@
+{% load static %} 
+{% load my_filters %} 
+
+<script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+        {% for game in object_list %}
+        {
+        "@type": "ListItem",
+        "position": {{ forloop.counter }},
+        "item": {
+            "@type": "VideoGame",
+            "name": "{{ game.title }}",
+            "image": "{{ game.cover_url }}",
+            "operatingSystem": "{{ game.platforms|join:', ' }}",
+            "applicationCategory": "Game",
+            "genre": "{{ game.genres|join:', ' }}",
+            {% if game.rating %}
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "{{ game.rating }}",
+                "bestRating": "100"
+            },
+            {% endif %}
+            "offers": {
+                "@type": "Offer",
+                "priceCurrency": "EUR",
+                "price": "{{ game.price_current|default:'0' }}"
+            }
+        }
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+    }
+</script>

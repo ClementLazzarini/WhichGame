@@ -1,0 +1,240 @@
+{% load static %} 
+{% load my_filters %} 
+
+<article 
+    x-data="{ showDetails: false, showTrailer: false }" 
+    @click="showDetails = true"
+    class="group relative h-[420px] w-full rounded-2xl bg-slate-800 border border-slate-700 shadow-xl overflow-hidden flex flex-col cursor-pointer transition-transform hover:-translate-y-1 duration-300"
+>
+    
+    <div class="relative flex-grow w-full overflow-hidden bg-slate-850">
+        <button 
+            @click.stop="$store.wishlist.toggle({{ game.id }})" 
+            class="absolute top-2 left-2 z-30 w-8 h-8 flex items-center justify-center rounded-full backdrop-blur-md shadow-lg transition-all duration-300 group/heart"
+            :class="$store.wishlist.has({{ game.id }}) ? 'bg-red-500/20 border border-red-500/50' : 'bg-black/30 border border-white/10 hover:bg-black/50'"
+        >
+            <i class="fa-heart transition-transform duration-200 group-hover/heart:scale-110"
+                :class="$store.wishlist.has({{ game.id }}) ? 'fa-solid text-red-500 animate-heartbeat' : 'fa-regular text-white'">
+            </i>
+        </button>
+        {% if request.user.is_superuser %}
+        <form action="{% url 'delete_game' game.id %}" method="POST" onsubmit="return confirm('Supprimer {{ game.title|escapejs }} définitivement ?');" class="absolute top-2 left-12 z-30">
+            {% csrf_token %}
+            <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-full bg-red-600/80 hover:bg-red-600 text-white shadow-lg backdrop-blur-md transition-all hover:scale-110 border border-red-400">
+                <i class="fa-solid fa-trash text-xs"></i>
+            </button>
+        </form>
+        {% endif %}
+        <img src="{{ game.cover_url }}" 
+                alt="Jaquette du jeu vidéo {{game.title}}" 
+                loading="lazy"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-80"></div>
+        
+        <div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-20">
+            {% if game.game_type == 8 %}
+                <span class="px-2 py-1 bg-purple-600/90 text-white text-[10px] font-black uppercase tracking-wider rounded shadow-lg backdrop-blur-sm border border-purple-400/30">Remake</span>
+            {% elif game.game_type == 9 %}
+                <span class="px-2 py-1 bg-cyan-600/90 text-white text-[10px] font-black uppercase tracking-wider rounded shadow-lg backdrop-blur-sm border border-cyan-400/30">Remaster</span>
+            {% elif game.game_type == 4 %}
+                <span class="px-2 py-1 bg-pink-600/90 text-white text-[10px] font-black uppercase tracking-wider rounded shadow-lg backdrop-blur-sm border border-pink-400/30">Expansion</span>
+            {% endif %}
+        </div>
+
+        <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-sm z-10">
+            <div class="flex items-center gap-2">
+                <span class="badge-blur text-green-300 bg-green-500/20" title="Note Utilisateurs">
+                    <i class="fa-solid fa-star text-[10px]"></i> {{game.rating|default:"-"}}
+                </span>
+                {% if game.release_year %}
+                <span class="badge-blur text-slate-300 bg-slate-700/50">
+                    {{ game.release_year }}
+                </span>
+                {% endif %}
+                <span class="badge-blur text-blue-200 bg-slate-700/80" title="Temps de jeu (Histoire principale)">
+                    <i class="fa-regular fa-clock text-[10px]"></i> {{game.playtime_main}}h
+                </span>
+            </div>
+            {% if game.price_current is None %}
+                <span class="badge-blur text-slate-400 bg-slate-700/30 font-medium text-xs">Non dispo</span>
+            {% elif game.price_current == 0 %}
+                <span class="badge-blur text-green-300 bg-green-500/20 font-bold">GRATUIT</span>
+            {% else %}
+                <span class="badge-blur text-amber-300 bg-amber-500/20 font-bold">{{ game.price_current }}€</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="relative z-10 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
+        <h3 class="text-lg font-bold text-white truncate" title="{{game.title}}">
+            {{game.title}}
+        </h3>
+    </div>
+
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 pointer-events-none"
+            :class="showDetails ? '!opacity-0 pointer-events-none' : ''">
+        <button class="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-full shadow-lg flex items-center gap-2 transform transition-transform group-hover:scale-105">
+            <i class="fa-solid fa-circle-info"></i> Plus d'informations
+        </button>
+    </div>
+
+
+    <div class="absolute inset-0 z-30 bg-slate-900 flex flex-col transition-transform duration-300 ease-out-cubic"
+            :class="showDetails ? 'translate-y-0' : 'translate-y-full'"
+            @click.stop
+            >
+        
+        <div class="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900 z-10">
+            <h3 class="text-base font-bold text-white truncate pr-2 flex-1">{{game.title}}</h3>
+            <button @click.stop="showDetails = false; showTrailer = false" class="text-slate-400 hover:text-white p-2 -mr-2 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <div class="flex-grow overflow-y-auto no-scrollbar p-4 space-y-6 pb-16">
+            
+            {% if game.video_id %}
+            <div class="w-full aspect-video rounded-xl overflow-hidden bg-black shadow-lg relative group/trailer flex-shrink-0">
+                <div x-show="!showTrailer" 
+                        @click="showTrailer = true"
+                        class="absolute inset-0 cursor-pointer flex items-center justify-center">
+                    <img src="https://img.youtube.com/vi/{{ game.video_id|default:'' }}/mqdefault.jpg" 
+                            alt="Trailer de {{ game.title }}" 
+                            class="w-full h-full object-cover opacity-80 group-hover/trailer:opacity-100 transition-opacity">
+                    <div class="absolute w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-xl group-hover/trailer:scale-110 transition-transform">
+                        <i class="fa-solid fa-play text-white ml-1"></i>
+                    </div>
+                </div>
+                
+                <template x-if="showTrailer">
+                    <iframe 
+                        src="https://www.youtube.com/embed/{{ game.video_id }}?autoplay=1&rel=0&origin={{ request.scheme }}://{{ request.get_host }}" 
+                        title="Trailer {{ game.title }}"
+                        class="w-full h-full" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen>
+                    </iframe>
+                </template>
+            </div>
+            {% endif %}
+
+            {% if game.screenshots %}
+            <div>
+                <span class="detail-label mb-2 block">Aperçu</span>
+                <div class="grid grid-cols-3 gap-2">
+                    {% for screen_url in game.screenshots|slice:":3" %}
+                    <div class="aspect-video rounded-lg overflow-hidden bg-slate-800 border border-slate-700 cursor-zoom-in group/screen">
+                        <img src="{{ screen_url }}" 
+                                alt="Screenshot {{ game.title }} {{ forloop.counter }}" 
+                                loading="lazy"
+                                class="w-full h-full object-cover group-hover/screen:scale-110 transition-transform duration-500"
+                                @click.stop="$dispatch('open-lightbox', { index: {{ forloop.counter0 }}, images: {{ game.screenshots|safe }} })">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                <div>
+                    <span class="detail-label">Genres</span>
+                    <p class="text-sm text-slate-300 leading-snug font-medium">
+                        {{ game.genres|join:", "|default:"Non spécifié" }}
+                    </p>
+                </div>
+                <div>
+                    <span class="detail-label">Plateformes</span>
+                    <div class="flex flex-wrap gap-1.5 mt-1">
+                        {% for platform in game.platforms %}
+                        <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] text-slate-300">
+                            {{ platform }}
+                        </span>
+                        {% empty %}
+                        <span class="text-xs text-slate-500">Non spécifié</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 flex flex-col gap-2 pb-2">
+                {% if game.remake_slug %}
+                <a href="{% url 'game_list' %}?search={{ game.remake_slug }}" 
+                @click.stop
+                class="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl transition-all shadow-md mb-2 border border-purple-400/30">
+                    <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                    <span class="text-sm">Voir la version récente</span>
+                </a>
+                {% endif %}
+
+                {# --- BOUTONS STORES (Optimisés SEO) --- #}
+                {% if game.price_current is not None %}
+                    {% if not request.GET.platform or "PC" in request.GET.platform or "Mac" in request.GET.platform or "Linux" in request.GET.platform %}
+                    <a href="https://www.cheapshark.com/search#q:{{ game.title|cut:':'|urlencode }}" 
+                    target="_blank" 
+                    rel="nofollow noopener noreferrer"
+                    @click.stop
+                    class="group/btn relative w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-2.5 rounded-xl transition-all duration-200 shadow-md overflow-hidden">
+                        <span class="relative z-10 flex items-center gap-2">
+                            <i class="fa-solid fa-desktop text-sm"></i>
+                            <span class="text-sm">PC / Mac</span> 
+                            <span class="bg-blue-800/50 px-2 py-0.5 rounded text-xs text-blue-100 ml-1">{{game.price_current}}€</span>
+                        </span>
+                    </a>
+                    {% endif %}
+                {% endif %}
+
+                {% if "Nintendo Switch" in game.platforms or "Wii U" in game.platforms or "Nintendo 3DS" in game.platforms %}
+                    {% if not request.GET.platform or "Nintendo" in request.GET.platform %}
+                    <a href="https://www.nintendo.com/fr-fr/Rechercher/Rechercher-299117.html?q={{ game.title|urlencode }}" 
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    @click.stop
+                    class="group/btn w-full flex items-center justify-center gap-2 bg-[#e60012] hover:bg-[#ff0019] text-white font-bold py-2.5 rounded-xl transition-all shadow-md">
+                        <i class="fa-solid fa-gamepad text-sm"></i>
+                        <span class="text-sm">eShop</span>
+                    </a>
+                    {% endif %}
+                {% endif %}
+
+                {% if "PlayStation 5" in game.platforms or "PlayStation 4" in game.platforms or "PlayStation 3" in game.platforms %}
+                    {% if not request.GET.platform or "PlayStation" in request.GET.platform %}
+                    <a href="https://store.playstation.com/fr-fr/search/{{ game.title|urlencode }}" 
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    @click.stop
+                    class="group/btn w-full flex items-center justify-center gap-2 bg-[#00439c] hover:bg-[#005bc4] text-white font-bold py-2.5 rounded-xl transition-all shadow-md">
+                        <i class="fa-brands fa-playstation text-sm"></i>
+                        <span class="text-sm">PS Store</span>
+                    </a>
+                    {% endif %}
+                {% endif %}
+
+                {% if "Xbox Series X|S" in game.platforms or "Xbox One" in game.platforms or "Xbox 360" in game.platforms %}
+                    {% if not request.GET.platform or "Xbox" in request.GET.platform %}
+                    <a href="https://www.xbox.com/fr-fr/search?q={{ game.title|urlencode }}" 
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    @click.stop
+                    class="group/btn w-full flex items-center justify-center gap-2 bg-[#107c10] hover:bg-[#159415] text-white font-bold py-2.5 rounded-xl transition-all shadow-md">
+                        <i class="fa-brands fa-xbox text-sm"></i>
+                        <span class="text-sm">Xbox Store</span>
+                    </a>
+                    {% endif %}
+                {% endif %}
+
+                {% if game.price_current is None and "Nintendo Switch" not in game.platforms and "PlayStation 5" not in game.platforms and "PlayStation 4" not in game.platforms and "Xbox Series X|S" not in game.platforms and "Xbox One" not in game.platforms %}
+                    <button disabled class="w-full flex items-center justify-center gap-2 bg-slate-800 text-slate-500 font-bold py-2.5 rounded-xl cursor-not-allowed border border-slate-700">
+                        <i class="fa-solid fa-ban text-sm"></i>
+                        <span class="text-sm">Non disponible</span>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent pointer-events-none z-20"></div>
+
+    </div>
+</article>
