@@ -1,5 +1,33 @@
 User-agent: *
 Disallow: /admin/
+Disallow: /explorer/
 Allow: /
 
-Sitemap: https://ton-site.pythonanywhere.com/sitemap.xml
+# Bloquer les bots d'IA (OpenAI, Amazon, Anthropic...)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+# Bloquer les bots de SEO agressifs (Semrush, Ahrefs, MJ12)
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
