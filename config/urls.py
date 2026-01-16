@@ -19,13 +19,22 @@ from . import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from django.views.generic import TemplateView
+from django.contrib.sitemaps.views import sitemap
+from whichgame.sitemaps import StaticViewSitemap, GameSitemap
+
+sitemaps = {
+    'static': StaticViewSitemap,
+    'games': GameSitemap,
+}
 
 urlpatterns = [
     path('', include('whichgame.urls')),
     path('admin/', admin.site.urls),
     path('about/', TemplateView.as_view(template_name="about.html"), name='about'),
     path('legal/', TemplateView.as_view(template_name="legal.html"), name='legal'),
-    path('robots.txt', TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
+    path('robots.txt', TemplateView.as_view(template_name="robots.txt", 
+                                            content_type="text/plain")),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 ]
 
 if settings.DEBUG:

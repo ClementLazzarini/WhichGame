@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
     'whichgame',
     'tailwind',
     'theme',
@@ -139,7 +141,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TAILWIND_APP_NAME = 'theme'
 INTERNAL_IPS = ["127.0.0.1"]
 
+# Django Sites Framework
+SITE_ID = 1
 
+# Jazzmin Settings
 JAZZMIN_SETTINGS = {
     "site_title": "WhichGame Admin",
     "site_header": "WhichGame",

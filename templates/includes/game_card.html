@@ -7,6 +7,7 @@
     class="group relative h-[420px] w-full rounded-2xl bg-slate-800 border border-slate-700 shadow-xl overflow-hidden flex flex-col cursor-pointer transition-transform hover:-translate-y-1 duration-300"
 >
     
+    {# --- 1. FACE AVANT (Jaquette) --- #}
     <div class="relative flex-grow w-full overflow-hidden bg-slate-850">
         <button 
             @click.stop="$store.wishlist.toggle({{ game.id }})" 
@@ -17,6 +18,7 @@
                 :class="$store.wishlist.has({{ game.id }}) ? 'fa-solid text-red-500 animate-heartbeat' : 'fa-regular text-white'">
             </i>
         </button>
+
         {% if request.user.is_superuser %}
         <form action="{% url 'delete_game' game.id %}" method="POST" onsubmit="return confirm('Supprimer {{ game.title|escapejs }} définitivement ?');" class="absolute top-2 left-12 z-30">
             {% csrf_token %}
@@ -25,6 +27,7 @@
             </button>
         </form>
         {% endif %}
+
         <img src="{{ game.cover_url }}" 
                 alt="Jaquette du jeu vidéo {{game.title}}" 
                 loading="lazy"
@@ -32,6 +35,7 @@
         
         <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-80"></div>
         
+        {# Badges Types (Remake...) #}
         <div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-20">
             {% if game.game_type == 8 %}
                 <span class="px-2 py-1 bg-purple-600/90 text-white text-[10px] font-black uppercase tracking-wider rounded shadow-lg backdrop-blur-sm border border-purple-400/30">Remake</span>
@@ -66,12 +70,14 @@
         </div>
     </div>
 
+    {# --- 2. FACE AVANT (Titre Footer) --- #}
     <div class="relative z-10 p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
         <h3 class="text-lg font-bold text-white truncate" title="{{game.title}}">
             {{game.title}}
         </h3>
     </div>
 
+    {# --- 3. BOUTON OVERLAY (Hover) --- #}
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 pointer-events-none"
             :class="showDetails ? '!opacity-0 pointer-events-none' : ''">
         <button class="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-full shadow-lg flex items-center gap-2 transform transition-transform group-hover:scale-105">
@@ -80,11 +86,13 @@
     </div>
 
 
+    {# --- 4. PANNEAU DÉPLIANT (Détails) --- #}
     <div class="absolute inset-0 z-30 bg-slate-900 flex flex-col transition-transform duration-300 ease-out-cubic"
             :class="showDetails ? 'translate-y-0' : 'translate-y-full'"
             @click.stop
             >
         
+        {# Header du panneau #}
         <div class="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900 z-10">
             <h3 class="text-base font-bold text-white truncate pr-2 flex-1">{{game.title}}</h3>
             <button @click.stop="showDetails = false; showTrailer = false" class="text-slate-400 hover:text-white p-2 -mr-2 transition-colors">
@@ -92,8 +100,10 @@
             </button>
         </div>
 
-        <div class="flex-grow overflow-y-auto no-scrollbar p-4 space-y-6 pb-16">
+        {# Contenu scrollable #}
+        <div class="flex-grow overflow-y-auto no-scrollbar p-4 space-y-5 pb-16">
             
+            {# A. TRAILER #}
             {% if game.video_id %}
             <div class="w-full aspect-video rounded-xl overflow-hidden bg-black shadow-lg relative group/trailer flex-shrink-0">
                 <div x-show="!showTrailer" 
@@ -121,6 +131,7 @@
             </div>
             {% endif %}
 
+            {# B. SCREENSHOTS #}
             {% if game.screenshots %}
             <div>
                 <span class="detail-label mb-2 block">Aperçu</span>
@@ -138,6 +149,7 @@
             </div>
             {% endif %}
 
+            {# C. INFOS TEXTE #}
             <div class="space-y-4">
                 <div>
                     <span class="detail-label">Genres</span>
@@ -159,6 +171,33 @@
                 </div>
             </div>
 
+            {# D. 🔥 RECOMMANDATIONS (NOUVEAU) #}
+            {% if game.similar_games.all %}
+            <div>
+                <span class="detail-label mb-2 block text-purple-300">Vous aimerez aussi</span>
+                <div class="grid grid-cols-3 gap-2">
+                    {% for similar in game.similar_games.all|slice:":3" %}
+                    <a href="?search={{ similar.slug }}" 
+                       @click.stop
+                       class="group/similar relative aspect-[3/4] rounded-lg overflow-hidden border border-slate-700 shadow-md hover:border-purple-500 hover:shadow-purple-500/20 transition-all cursor-pointer">
+                        
+                        <img src="{{ similar.cover_url }}" 
+                             alt="{{ similar.title }}"
+                             class="w-full h-full object-cover group-hover/similar:scale-110 transition-transform duration-500">
+                        
+                        {# Titre au survol #}
+                        <div class="absolute inset-0 bg-black/70 opacity-0 group-hover/similar:opacity-100 transition-opacity flex items-end p-2">
+                            <span class="text-[9px] leading-tight font-bold text-white line-clamp-2">
+                                {{ similar.title }}
+                            </span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {# E. BOUTONS D'ACTION (Stores) #}
             <div class="pt-2 flex flex-col gap-2 pb-2">
                 {% if game.remake_slug %}
                 <a href="{% url 'game_list' %}?search={{ game.remake_slug }}" 
@@ -169,7 +208,6 @@
                 </a>
                 {% endif %}
 
-                {# --- BOUTONS STORES (Optimisés SEO) --- #}
                 {% if game.price_current is not None %}
                     {% if not request.GET.platform or "PC" in request.GET.platform or "Mac" in request.GET.platform or "Linux" in request.GET.platform %}
                     <a href="https://www.cheapshark.com/search#q:{{ game.title|cut:':'|urlencode }}" 
