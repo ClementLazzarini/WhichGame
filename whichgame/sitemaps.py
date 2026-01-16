@@ -19,7 +19,7 @@ class GameSitemap(Sitemap):
     changefreq = 'weekly'
 
     def items(self):
-        return Game.objects.filter(slug__isnull=False)
+        return Game.objects.filter(slug__isnull=False).order_by('id')
 
     def location(self, obj):
         return f"/explorer/?search={obj.slug}" # type: ignore
