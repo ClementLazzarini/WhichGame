@@ -38,3 +38,36 @@ class Game(models.Model):
     
     def __str__(self):
         return self.title
+    
+
+class GameCollection(models.Model):
+    COLORS = [
+        ('yellow', 'Jaune (Top Rated)'),
+        ('green', 'Vert (Budget)'),
+        ('purple', 'Violet (New)'),
+        ('blue', 'Bleu (Standard)'),
+        ('red', 'Rouge (Hot)'),
+    ]
+
+    title = models.CharField(max_length=100, verbose_name="Titre de la collection")
+    subtitle = models.CharField(max_length=255, verbose_name="Sous-titre (ex: Note min 90)")
+    
+    url_filter = models.CharField(
+        max_length=255, 
+        blank=True, 
+        help_text="Ex: ?rating=90 ou ?price=10 (laisser vide pour cacher le bouton)"
+    )
+    
+    theme_color = models.CharField(max_length=20, choices=COLORS, default='blue')
+    
+    is_active = models.BooleanField(default=True)
+    display_order = models.PositiveIntegerField(default=0)
+    games = models.ManyToManyField(Game, related_name="collections", blank=True)
+
+    class Meta:
+        ordering = ['display_order']
+        verbose_name = "Collection Home"
+        verbose_name_plural = "Collections Home"
+
+    def __str__(self):
+        return self.title

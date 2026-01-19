@@ -2,8 +2,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
-from .models import Game 
-import datetime
+from .models import Game , GameCollection
 
 class HomeListView(ListView):
     model = Game
@@ -113,39 +112,12 @@ class HomeView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # --- FILTRE QUALITÉ GLOBAL (LE GARDEN KEEPER 🛡️) ---
-        # On définit ici les critères stricts pour apparaître sur l'accueil.
-        base_qs = Game.objects.filter(
-            rating__isnull=False,           # Doit avoir une note
-            cover_url__isnull=False,        # Doit avoir une jaquette
-            playtime_main__gt=0,            # Doit durer plus de 0h (Exit les "Unknown")
-            price_current__isnull=False     # Doit avoir un prix connu (Même 0€ c'est ok, mais pas None)
-        ).exclude(cover_url="")             # Sécurité supplémentaire pour les chaines vides
-
-        # 1. LES INCONTOURNABLES (Note > 90)
-        context['top_rated'] = base_qs.filter(rating__gte=90).order_by('-rating')[:4]
-
-        # 2. LES DERNIÈRES PÉPITES (Sorties Récentes + Bonne note)
-        current_year = datetime.date.today().year
-        context['new_releases'] = base_qs.filter(
-            release_year__gte=current_year-1, 
-            rating__gte=80
-        ).order_by('-release_year', '-rating')[:4]
-
-        # 3. PETITS BUDGETS (Moins de 10€ et > 80 de note)
-        # Note : price_current__gt=0 exclut les jeux Gratuits ici. 
-        context['budget_gems'] = base_qs.filter(
-            price_current__lt=10, 
-            price_current__gt=0,
-            rating__gte=80
-        ).order_by('-rating')[:4]
-
-        # 4. COURTES AVENTURES (Moins de 10h et > 85 de note)
-        context['short_games'] = base_qs.filter(
-            playtime_main__lte=10,
-            rating__gte=85
-        ).order_by('-rating')[:4]
-
+        # On récupère toutes les collections actives, triées par ordre
+        # .prefetch_related('games') est CRUCIAL pour la performance (évite 50 requêtes SQL)
+        context['collections'] = GameCollection.objects.filter(
+            is_active=True
+        ).order_by('display_order').prefetch_related('games')
+        
         return context
 
 

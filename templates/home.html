@@ -112,63 +112,56 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
 <div id="selection" class="bg-slate-950">
     <div class="container mx-auto px-4 py-24 space-y-32">
 
+        {% for collection in collections %}
         <section class="relative">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4 border-l-4 border-yellow-500 pl-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4 border-l-4 pl-6"
+                 class="
+                    {% if collection.theme_color == 'yellow' %}border-yellow-500
+                    {% elif collection.theme_color == 'green' %}border-green-500
+                    {% elif collection.theme_color == 'purple' %}border-purple-500
+                    {% elif collection.theme_color == 'red' %}border-red-500
+                    {% else %}border-blue-500{% endif %}
+                 ">
+                
                 <div>
                     <h2 class="text-3xl md:text-4xl font-black text-white flex items-center gap-3">
-                        Les Incontournables
+                        {{ collection.title }}
                     </h2>
-                    <p class="text-slate-400 mt-2 text-lg">La crème de la crème. Note minimum : <span class="text-yellow-500 font-bold">90/100</span>.</p>
+                    <p class="text-slate-400 mt-2 text-lg">
+                        {{ collection.subtitle|safe }}
+                    </p>
                 </div>
-                <a href="{% url 'game_list' %}?rating=90" class="group flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 hover:border-yellow-500/50">
-                    Voir le classement complet <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform text-yellow-500"></i>
+
+                {% if collection.url_filter %}
+                <a href="{% url 'game_list' %}{{ collection.url_filter }}" 
+                   class="group flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 hover:border-opacity-50
+                   {% if collection.theme_color == 'yellow' %}hover:border-yellow-500
+                   {% elif collection.theme_color == 'green' %}hover:border-green-500
+                   {% elif collection.theme_color == 'purple' %}hover:border-purple-500
+                   {% elif collection.theme_color == 'red' %}hover:border-red-500
+                   {% else %}hover:border-blue-500{% endif %}
+                   ">
+                    Voir tout 
+                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform 
+                    {% if collection.theme_color == 'yellow' %}text-yellow-500
+                    {% elif collection.theme_color == 'green' %}text-green-500
+                    {% elif collection.theme_color == 'purple' %}text-purple-500
+                    {% elif collection.theme_color == 'red' %}text-red-500
+                    {% else %}text-blue-500{% endif %}
+                    "></i>
                 </a>
+                {% endif %}
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {% for game in top_rated %}
+                {% for game in collection.games.all|slice:":4" %}
                     {% include "includes/mini_card.html" %}
+                {% empty %}
+                    <p class="text-slate-500 italic col-span-4">Aucun jeu dans cette collection pour le moment.</p>
                 {% endfor %}
             </div>
         </section>
-
-        <section class="relative">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4 border-l-4 border-green-500 pl-6">
-                <div>
-                    <h2 class="text-3xl md:text-4xl font-black text-white">
-                        Moins de 10€
-                    </h2>
-                    <p class="text-slate-400 mt-2 text-lg">Excellents jeux qui respectent votre portefeuille.</p>
-                </div>
-                <a href="{% url 'game_list' %}?price=10" class="group flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 hover:border-green-500/50">
-                    Voir les bons plans <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform text-green-500"></i>
-                </a>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {% for game in budget_gems %}
-                    {% include "includes/mini_card.html" %}
-                {% endfor %}
-            </div>
-        </section>
-
-        <section class="relative">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4 border-l-4 border-purple-500 pl-6">
-                <div>
-                    <h2 class="text-3xl md:text-4xl font-black text-white">
-                        Sorties Récentes
-                    </h2>
-                    <p class="text-slate-400 mt-2 text-lg">Les pépites sorties en 2024 et 2025.</p>
-                </div>
-                <a href="{% url 'game_list' %}?year=2024" class="group flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 hover:border-purple-500/50">
-                    Voir les nouveautés <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform text-purple-500"></i>
-                </a>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {% for game in new_releases %}
-                    {% include "includes/mini_card.html" %}
-                {% endfor %}
-            </div>
-        </section>
+        {% endfor %}
 
     </div>
 

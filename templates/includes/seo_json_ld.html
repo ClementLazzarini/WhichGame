@@ -21,6 +21,7 @@
             "aggregateRating": {
                 "@type": "AggregateRating",
                 "ratingValue": "{{ game.rating }}",
+                "ratingCount": "{{ game.ratings_count|default:'1' }}",
                 "bestRating": "100"
             },
             {% endif %}
