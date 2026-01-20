@@ -144,23 +144,85 @@ INTERNAL_IPS = ["127.0.0.1"]
 # Django Sites Framework
 SITE_ID = 1
 
-# Jazzmin Settings
+# --- CONFIGURATION JAZZMIN ---
 JAZZMIN_SETTINGS = {
+    # 1. Titres et Marque
     "site_title": "WhichGame Admin",
     "site_header": "WhichGame",
-    "site_brand": "WhichGame",
-    "welcome_sign": "Bienvenue sur WhichGame",
-    "search_model": "whichgame.Game",
+    "site_brand": "WhichGame HQ",
+    "welcome_sign": "Bienvenue, Commandant",
+    "copyright": "Clement Lazzarini",
+    
+    # 2. Logo et Apparence
+    "site_logo": "images/favicon.png", 
+    "site_logo_classes": "img-circle",
+    
+    # 3. Avatar utilisateur (optionnel, sinon laisse None)
     "user_avatar": None,
+
+    # 4. Menu Latéral et Navigation
+    "search_model": ["whichgame.Game"], 
+
+    # Liens rapides en haut (Top Menu)
     "topmenu_links": [
-        {"name": "Voir le site",  "url": "home", "permissions": ["auth.view_user"]},
+        {"name": "Voir le site", "url": "home", "permissions": ["auth.view_user"]},
+        {"name": "Google Analytics", "url": "https://search.google.com/", "new_window": True},
+        {"model": "whichgame.Game"},
     ],
-    "show_sidebar": True,
-    "navigation_expanded": True,
+
+    # Liens dans le menu latéral
+    "order_with_respect_to": ["whichgame", "auth"],
+
+    # 5. Icônes (FontAwesome 5)
+    # Trouve les codes ici : https://fontawesome.com/v5/search
     "icons": {
         "auth": "fas fa-users-cog",
-        "auth.user": "fas fa-user",
+        "auth.user": "fas fa-user-astronaut",
         "auth.Group": "fas fa-users",
+        
         "whichgame.Game": "fas fa-gamepad",
+        "whichgame.GameCollection": "fas fa-layer-group",
     },
+    
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    
+    # Affiche ou non le constructeur d'interface
+    "show_ui_builder": False,
+
+    # 6. CSS Personnalisé
+    "custom_css": "css/admin_custom.css",
+}
+
+# --- UI TWEAKS (LE LOOK GAMING SOMBRE) ---
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    
+    # Couleurs de la barre du haut
+    "brand_colour": "navbar-indigo",
+    "accent": "accent-primary",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    
+    # Le Thème Sombre
+    "sidebar": "sidebar-dark-indigo",
+    "sidebar_nav_small_text": False,
+    "theme": "cosmo",
+    
+    # Personnalisation des boutons
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
 }

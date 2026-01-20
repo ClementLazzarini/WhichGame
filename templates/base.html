@@ -62,8 +62,22 @@
     {% endblock %}
 </head>
 
-<body class="text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+<body class="bg-slate-950 font-sans text-slate-200 antialiased min-h-screen flex flex-col"
+      x-data="{ isLoading: false }"
+      @submit.window="isLoading = true"
+      @pageshow.window="isLoading = false" 
+>
 
+    <div x-show="isLoading" 
+         x-transition.opacity.duration.300ms
+         class="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center"
+         style="display: none;"> <div class="relative w-24 h-24 mb-4">
+            <div class="absolute inset-0 border-t-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+            <div class="absolute inset-2 border-t-4 border-purple-500 border-solid rounded-full animate-spin" style="animation-direction: reverse; animation-duration: 1s;"></div>
+        </div>
+
+        <p class="text-white font-bold text-lg animate-pulse">Recherche des pépites...</p>
+    </div>
     <div class="flex-grow">
         {% block content %}
         {% endblock %}
@@ -201,6 +215,13 @@
                     return "{% url 'game_list' %}?wishlist_ids=" + this.items.join(',');
                 }
             });
+        });
+    </script>
+    <script>
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) { 
+                document.querySelector('[x-data]').__x.$data.isLoading = false;
+            }
         });
     </script>
 
