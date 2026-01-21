@@ -170,6 +170,32 @@ JAZZMIN_SETTINGS = {
         {"model": "whichgame.Game"},
     ],
 
+    "custom_links": {
+        "whichgame": [
+            # 1. Import Global (Bouton Direct)
+            {
+                "name": "🔄 Import Jeux (Global)", 
+                "url": "/admin/cmd/import_games/",
+                "icon": "fas fa-globe",
+                "permissions": ["auth.view_user"]
+            },
+            # 2. Import Franchise (Ouvre le formulaire)
+            {
+                "name": "📦 Import Franchise...", 
+                "url": "import_franchise_wizard",
+                "icon": "fas fa-search-plus",
+                "permissions": ["auth.view_user"]
+            },
+            # 3. Recalcul IA (Bouton Direct)
+            {
+                "name": "🧠 Recalculer IA", 
+                "url": "/admin/cmd/calculate_recommendations/",
+                "icon": "fas fa-brain",
+                "permissions": ["auth.view_user"]
+            },
+        ]
+    },
+
     # Liens dans le menu latéral
     "order_with_respect_to": ["whichgame", "auth"],
 

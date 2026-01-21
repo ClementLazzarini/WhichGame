@@ -19,6 +19,7 @@ from . import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from django.views.generic import TemplateView
+from whichgame.views import run_command, import_franchise_view
 from django.contrib.sitemaps.views import sitemap
 from whichgame.sitemaps import StaticViewSitemap, GameSitemap
 
@@ -29,6 +30,8 @@ sitemaps = {
 
 urlpatterns = [
     path('', include('whichgame.urls')),
+    path('admin/cmd/<str:cmd_name>/', run_command, name='run_admin_command'),
+    path('admin/wizard/franchise/', import_franchise_view, name='import_franchise_wizard'),
     path('admin/', admin.site.urls),
     path('about/', TemplateView.as_view(template_name="about.html"), name='about'),
     path('legal/', TemplateView.as_view(template_name="legal.html"), name='legal'),

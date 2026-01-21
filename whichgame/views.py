@@ -1,5 +1,13 @@
+import io
+import time
+
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import get_object_or_404, redirect
+from django.core.management import call_command
+from django.contrib import messages
+from django.utils.html import format_html
+from django.http import HttpResponse
+from django.template import Template, RequestContext
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
 from .models import Game , GameCollection
@@ -126,3 +134,116 @@ def delete_game(request, pk):
     game = get_object_or_404(Game, pk=pk)
     game.delete()
     return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+
+@staff_member_required
+def run_command(request, cmd_name):
+    """
+    Lance une commande SANS argument (ex: Recalcul IA, Import Global)
+    """
+    # Liste blanche
+    ALLOWED_COMMANDS = {
+        'import_games': "Import Global des Jeux",
+        'calculate_recommendations': "Recalcul de l'IA",
+    }
+    
+    # 1. Vérification
+    if cmd_name not in ALLOWED_COMMANDS:
+        messages.error(request, f"⛔ Commande '{cmd_name}' inconnue.")
+        return redirect('admin:index')
+
+    print(f"🚀 [ADMIN] Lancement de la commande : {cmd_name}...") # Log console
+
+    try:
+        start_time = time.time()
+        
+        # 2. Capture des logs
+        out = io.StringIO()
+        
+        # Astuce : On passe stdout ET stderr pour capturer les erreurs aussi
+        call_command(cmd_name, stdout=out, stderr=out)
+        
+        result = out.getvalue()
+        duration = round(time.time() - start_time, 2)
+        
+        print(f"✅ [ADMIN] Terminé en {duration}s") # Log console
+
+        # 3. Message de succès (limité à 1000 caractères pour ne pas casser l'affichage)
+        short_result = (result[:1000] + '...') if len(result) > 1000 else result
+        
+        messages.success(request, format_html(
+            f"✅ <b>{ALLOWED_COMMANDS[cmd_name]}</b> terminé en {duration}s !<br>"
+            f"<div style='background:#1e293b; color:#10b981; padding:10px; border-radius:5px; "
+            f"max-height:200px; overflow-y:auto; font-family:monospace; margin-top:5px;'>"
+            f"{short_result.replace(chr(10), '<br>')}"
+            f"</div>"
+        ))
+
+    except Exception as e:
+        print(f"❌ [ADMIN] Erreur : {str(e)}") # Log console
+        messages.error(request, f"❌ Erreur critique : {str(e)}")
+
+    # 4. Redirection FORCÉE vers l'accueil admin (plus sûr que Referer)
+    return redirect('admin:index')
+
+
+@staff_member_required
+def import_franchise_view(request):
+    """
+    Affiche un petit formulaire pour choisir la franchise à importer
+    """
+    if request.method == "POST":
+        franchise_name = request.POST.get("franchise_name")
+        if franchise_name:
+            try:
+                out = io.StringIO()
+                call_command('import_franchise', franchise_name, stdout=out, stderr=out)
+                result = out.getvalue()
+                messages.success(request, format_html(f"✅ Import de <b>{franchise_name}</b> terminé !<br><pre>{result}</pre>"))
+            except Exception as e:
+                messages.error(request, f"❌ Erreur : {str(e)}")
+        else:
+            messages.warning(request, "Veuillez entrer un nom.")
+            
+        return redirect('admin:index')
+
+    # --- LE TEMPLATE HTML ---
+    html_content = """
+    {% extends "admin/base_site.html" %}
+    
+    {% block content %}
+    <div style="max-width: 500px; margin: 40px auto; background: #1e293b; padding: 30px; border-radius: 10px; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+        <h1 style="color: #a78bfa; margin-bottom: 20px; font-size: 1.5rem;"><i class="fas fa-boxes"></i> Importer une Franchise</h1>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <label style="display:block; margin-bottom:10px; color: #cbd5e1;">Nom de la franchise (ex: Mario, Zelda) :</label>
+            
+            <input type="text" name="franchise_name" placeholder="Tapez ici..." 
+                   style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #475569; margin-bottom: 20px; background: #0f172a; color: white;" required>
+            
+            <button type="submit" 
+                    style="background: #7c3aed; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.3s;">
+                Lancer l'import 🚀
+            </button>
+        </form>
+        
+        <br>
+        <div style="text-align: center;">
+            <a href="/admin/" style="color: #94a3b8; text-decoration: none; font-size: 0.9rem;">← Retour au tableau de bord</a>
+        </div>
+    </div>
+    {% endblock %}
+    """
+    
+    # --- RENDU CORRECT AVEC REQUESTCONTEXT ---
+    template = Template(html_content)
+    
+    # RequestContext prend 'request' en 1er argument.
+    # Il injecte AUTOMATIQUEMENT : user, messages, csrf_token, perms... et request !
+    context = RequestContext(request, {
+        'site_header': 'WhichGame Admin',
+        'site_title': 'WhichGame Admin',
+    })
+    
+    return HttpResponse(template.render(context))
