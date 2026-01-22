@@ -1,0 +1,255 @@
+{% load static %} 
+{% load my_filters %} 
+
+<header 
+    class="sticky top-0 z-50 w-full bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 py-4 shadow-md transition-all duration-300"
+    x-data="{ mobileMenu: false, searchFocused: false, openFilter: null }" 
+    @click.outside="openFilter = null; mobileMenu = false"
+>
+    <div class="container mx-auto px-4 md:px-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            <div class="flex items-center justify-between md:block w-full md:w-auto">
+                <div class="flex flex-col items-start">
+                    <a href="{% url 'home' %}" class="text-2xl font-black tracking-tight text-white hover:opacity-80 transition-opacity leading-none">
+                        WhichGame<span class="text-blue-500">.</span>
+                    </a>
+
+                    {% if request.resolver_match.url_name == 'game_list' and page_obj %}
+                        <p class="text-xs text-slate-400 font-medium mt-1">
+                            <span class="text-blue-400 font-bold">{{ page_obj.paginator.count }}</span> pépites trouvées.
+                        </p>
+                    {% else %}
+                        <p class="text-xs text-slate-500 font-medium hidden md:block mt-1">
+                            Trouvez votre prochaine aventure
+                        </p>
+                    {% endif %}
+                </div>
+
+                <button 
+                    @click="mobileMenu = !mobileMenu"
+                    class="md:hidden p-2 text-slate-400 hover:text-white transition-colors bg-slate-800 rounded-lg border border-slate-700"
+                    aria-label="Menu"
+                >
+                    <i class="fa-solid transition-transform duration-300" 
+                       :class="mobileMenu ? 'fa-xmark' : 'fa-bars'"></i>
+                </button>
+            </div>
+
+            <div 
+                class="flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto md:flex transition-all duration-300 ease-in-out origin-top"
+                :class="mobileMenu ? 'flex' : 'hidden'"
+            >
+                
+                <a :href="$store.wishlist.getUrl()"
+                   x-show="$store.wishlist.count() > 0"
+                   x-transition
+                   class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-bold flex items-center justify-center gap-2 bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500 hover:text-white mb-2 md:mb-0"
+                >
+                    <i class="fa-solid fa-heart"></i>
+                    <span x-text="'Ma Liste'"></span>
+                </a>
+                
+                <form action="{% url 'game_list' %}" method="GET" class="relative group w-full md:w-auto transition-all duration-300" :class="{'md:w-72': searchFocused, 'md:w-64': !searchFocused}">
+                    
+                    {% if request.resolver_match.url_name == 'game_list' %}
+                        {% if request.GET.price %}<input type="hidden" name="price" value="{{ request.GET.price }}">{% endif %}
+                        {% if request.GET.duration %}<input type="hidden" name="duration" value="{{ request.GET.duration }}">{% endif %}
+                        {% if request.GET.platform %}<input type="hidden" name="platform" value="{{ request.GET.platform }}">{% endif %}
+                        {% if request.GET.genre %}<input type="hidden" name="genre" value="{{ request.GET.genre }}">{% endif %}
+                        {% if request.GET.year %}<input type="hidden" name="year" value="{{ request.GET.year }}">{% endif %}
+                    {% endif %}
+
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-search text-slate-500 group-focus-within:text-blue-500 transition-colors"></i>
+                    </div>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        value="{{ request.GET.search|default:'' }}"
+                        placeholder="Chercher un jeu..." 
+                        @focus="searchFocused = true"
+                        @blur="searchFocused = false"
+                        class="block w-full pl-10 pr-3 py-2 border border-slate-700 rounded-xl leading-5 bg-slate-800 text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm shadow-sm"
+                    >
+                    {% if request.GET.search and request.resolver_match.url_name == 'game_list' %}
+                    <a href="?{% url_replace search=None page=None %}" class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-slate-500 hover:text-white">
+                        <i class="fa-solid fa-xmark"></i>
+                    </a>
+                    {% endif %}
+                </form>
+
+                {% if request.resolver_match.url_name == 'game_list' %}
+                    <div class="h-6 w-px bg-slate-700 hidden md:block mx-1"></div>
+
+                    <div class="flex flex-wrap gap-2 items-center justify-center md:justify-start">
+        
+                        <div class="relative group"> 
+                            <button 
+                                @click="openFilter = (openFilter === 'price' ? null : 'price')"
+                                class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2"
+                                :class="{'bg-blue-600 text-white border-blue-600': '{{ request.GET.price }}' || openFilter === 'price', 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500': !'{{ request.GET.price }}' && openFilter !== 'price'}"
+                            >
+                                <i class="fa-solid fa-coins text-xs"></i>
+                                {% if request.GET.price %}Max {{ request.GET.price }}€{% else %}Budget{% endif %}
+                            </button>
+
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 bg-slate-900 border border-slate-600 text-white text-[10px] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none hidden md:block z-[60]" x-show="openFilter !== 'price'">
+                                Définir un prix maximum
+                                <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-l border-t border-slate-600 transform rotate-45"></div>
+                            </div>
+
+                            <div x-show="openFilter === 'price'"
+                                x-transition
+                                class="absolute top-full left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 mt-2 w-64 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-4"
+                                style="display: none;">
+                                
+                                <form method="GET" x-ref="priceForm" x-data="{ price: '{{ request.GET.price|default:'50' }}' }">
+                                    {% if request.GET.duration %}<input type="hidden" name="duration" value="{{ request.GET.duration }}">{% endif %}
+                                    {% if request.GET.search %}<input type="hidden" name="search" value="{{ request.GET.search }}">{% endif %}
+                                    {% if request.GET.platform %}<input type="hidden" name="platform" value="{{ request.GET.platform }}">{% endif %}
+                                    {% if request.GET.genre %}<input type="hidden" name="genre" value="{{ request.GET.genre }}">{% endif %}
+                                    {% if request.GET.year %}<input type="hidden" name="year" value="{{ request.GET.year }}">{% endif %}
+                                    
+                                    <div class="flex justify-between items-end mb-4">
+                                        <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Budget Max</span>
+                                        <div class="text-white font-black text-2xl flex items-baseline">
+                                            <span x-text="price"></span><span class="text-sm text-blue-500 ml-1">€</span>
+                                        </div>
+                                    </div>
+                                    <div class="relative w-full h-6 flex items-center mb-2">
+                                        <input type="range" name="price" min="0" max="100" step="5" x-model="price" @change="$refs.priceForm.submit()" class="absolute z-20 w-full h-2 opacity-0 cursor-pointer">
+                                        <div class="absolute z-10 top-1/2 left-0 right-0 h-1.5 bg-slate-600 rounded-full -translate-y-1/2 w-full"></div>
+                                        <div class="absolute z-10 top-1/2 left-0 h-1.5 bg-blue-500 rounded-full -translate-y-1/2 pointer-events-none" :style="'width: ' + (price) + '%'"></div>
+                                        <div class="absolute z-10 top-1/2 h-4 w-4 bg-white rounded-full shadow-md border-2 border-blue-500 -translate-y-1/2 pointer-events-none transition-all" :style="'left: ' + (price) + '%'"></div>
+                                    </div>
+                                    <div class="flex justify-between text-[10px] text-slate-500 font-bold uppercase mt-1">
+                                        <span>Gratuit</span><span>100€ +</span>
+                                    </div>
+                                    {% if request.GET.price %}
+                                    <div class="border-t border-slate-700 mt-3 pt-2 text-center">
+                                        <a href="?{% url_replace price=None page=None %}" class="text-xs text-red-400 hover:text-red-300 font-medium">Réinitialiser</a>
+                                    </div>
+                                    {% endif %}
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="relative group">
+                            <button 
+                                @click="openFilter = (openFilter === 'duration' ? null : 'duration')"
+                                class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2"
+                                :class="{'bg-blue-600 text-white border-blue-600': '{{ request.GET.duration }}' || openFilter === 'duration', 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500': !'{{ request.GET.duration }}' && openFilter !== 'duration'}"
+                            >
+                                <i class="fa-regular fa-clock text-xs"></i>
+                                {% if request.GET.duration == 'short' %}- 10h
+                                {% elif request.GET.duration == 'medium' %}10-30h
+                                {% elif request.GET.duration == 'long' %}+ 30h
+                                {% else %}Durée{% endif %}
+                            </button>
+                            
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max px-2 py-1 bg-slate-900 border border-slate-600 text-white text-[10px] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none hidden md:block z-[60]" x-show="openFilter !== 'duration'">
+                                Temps de jeu
+                                <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 border-l border-t border-slate-600 transform rotate-45"></div>
+                            </div>
+
+                            <div x-show="openFilter === 'duration'" 
+                                x-transition class="absolute top-full left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1" 
+                                style="display: none;">
+                                <a href="?{% url_replace duration='short' page=None %}" class="block px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg">Court (-10h)</a>
+                                <a href="?{% url_replace duration='medium' page=None %}" class="block px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg">Moyen (10-30h)</a>
+                                <a href="?{% url_replace duration='long' page=None %}" class="block px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg">Long (+30h)</a>
+                                {% if request.GET.duration %}
+                                    <div class="border-t border-slate-700 mt-1 pt-1"><a href="?{% url_replace duration=None page=None %}" class="block py-2 text-xs text-red-400 text-center">Réinitialiser</a></div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="relative group">
+                            <button 
+                                @click="openFilter = (openFilter === 'year' ? null : 'year')"
+                                class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2"
+                                :class="{'bg-blue-600 text-white border-blue-600': '{{ request.GET.year }}' || openFilter === 'year', 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500': !'{{ request.GET.year }}' && openFilter !== 'year'}"
+                            >
+                                <i class="fa-regular fa-calendar text-xs"></i>
+                                {% if request.GET.year %}
+                                    {% for y_val, y_label in years_list %}
+                                        {% if request.GET.year == y_val %}{{ y_label }}{% endif %}
+                                    {% endfor %}
+                                {% else %}Sortie{% endif %}
+                            </button>
+
+                            <div x-show="openFilter === 'year'" x-transition class="absolute top-full right-0 md:left-0 md:right-auto mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1" style="display: none;">
+                                {% for y_val, y_label in years_list %}
+                                <a href="?{% url_replace year=y_val page=None %}" class="block px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg flex justify-between items-center group">
+                                    {{ y_label }}
+                                    {% if request.GET.year == y_val %}<i class="fa-solid fa-check text-xs"></i>{% endif %}
+                                </a>
+                                {% endfor %}
+                                {% if request.GET.year %}
+                                <div class="border-t border-slate-700 mt-1 pt-1"><a href="?{% url_replace year=None page=None %}" class="block py-2 text-xs text-red-400 text-center">Réinitialiser</a></div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="relative group">
+                            <button 
+                                @click="openFilter = (openFilter === 'genre' ? null : 'genre')"
+                                class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2"
+                                :class="{'bg-blue-600 text-white border-blue-600': '{{ request.GET.genre }}' || openFilter === 'genre', 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500': !'{{ request.GET.genre }}' && openFilter !== 'genre'}"
+                            >
+                                <i class="fa-solid fa-masks-theater text-xs"></i>
+                                {% if request.GET.genre %}{{ request.GET.genre }}{% else %}Genre{% endif %}
+                            </button>
+
+                            <div x-show="openFilter === 'genre'" x-transition class="absolute top-full left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1 overflow-hidden" style="display: none;">
+                                <div class="max-h-60 overflow-y-auto custom-scrollbar">
+                                    {% for g in genres_list %}
+                                    <a href="?{% url_replace genre=g page=None %}" class="block px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg transition-colors flex justify-between items-center group">
+                                        {{ g }}
+                                        {% if request.GET.genre == g %}<i class="fa-solid fa-check text-xs"></i>{% endif %}
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                {% if request.GET.genre %}
+                                <div class="border-t border-slate-700 mt-1 pt-1"><a href="?{% url_replace genre=None page=None %}" class="block py-2 text-xs text-red-400 hover:text-red-300 text-center">Réinitialiser</a></div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="relative group">
+                            <button 
+                                @click="openFilter = (openFilter === 'platform' ? null : 'platform')"
+                                class="btn-filter transition-all duration-300 whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium flex items-center gap-2"
+                                :class="{'bg-blue-600 text-white border-blue-600': '{{ request.GET.platform }}' || openFilter === 'platform', 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500': !'{{ request.GET.platform }}' && openFilter !== 'platform'}"
+                            >
+                                <i class="fa-solid fa-gamepad text-xs"></i>
+                                {% if request.GET.platform %}{{ request.GET.platform }}{% else %}Plateforme{% endif %}
+                            </button>
+
+                            <div x-show="openFilter === 'platform'" x-transition class="absolute top-full right-0 md:left-auto md:right-0 md:translate-x-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 p-1 overflow-hidden" style="display: none;">
+                                <div class="max-h-60 overflow-y-auto custom-scrollbar">
+                                    {% for plat in platforms_list %}
+                                    <a href="?{% url_replace platform=plat page=None %}" class="block px-3 py-2 text-sm text-slate-300 hover:bg-blue-600 hover:text-white rounded-lg transition-colors flex justify-between items-center group">
+                                        {{ plat }}
+                                        {% if request.GET.platform == plat %}<i class="fa-solid fa-check text-xs"></i>{% endif %}
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                {% if request.GET.platform %}
+                                <div class="border-t border-slate-700 mt-1 pt-1"><a href="?{% url_replace platform=None page=None %}" class="block px-3 py-2 text-xs text-red-400 hover:text-red-300 text-center">Réinitialiser</a></div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+                {% endif %} {% if request.resolver_match.url_name != 'game_list' %}
+                <a href="{% url 'game_list' %}" class="md:hidden mt-3 w-full text-center block px-4 py-2 bg-slate-800 text-slate-300 rounded-xl border border-slate-700 font-bold">
+                    Tout le catalogue
+                </a>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</header>

@@ -27,10 +27,6 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
 {% endblock %}
 
 {% block content %}
-{# HEADER #}
-{% include "includes/filter_header.html" %}
-
-
 <main class="container mx-auto px-4 md:px-6 py-8">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {% for game in object_list %}
