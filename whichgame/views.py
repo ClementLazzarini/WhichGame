@@ -82,7 +82,7 @@ class HomeListView(ListView):
             except ValueError:
                 pass
 
-        return queryset.order_by('-rating') # On trie par note par défaut
+        return queryset.order_by('-rating')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -25,6 +25,10 @@ class Command(BaseCommand):
                     offset = int(f.read().strip())
                 except ValueError: 
                     offset = 0
+
+        if offset >= 10000:
+            self.stdout.write(self.style.SUCCESS("🛑 Limite de 10 000 jeux atteinte."))
+            return
         
         self.stdout.write(f"🚀 Démarrage Import (Offset : {offset})")
 
