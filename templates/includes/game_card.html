@@ -8,7 +8,10 @@
 >
     
     {# --- 1. FACE AVANT (Jaquette) --- #}
+{# --- 1. FACE AVANT (Jaquette) --- #}
     <div class="relative flex-grow w-full overflow-hidden bg-slate-850">
+        
+        {# 1. CŒUR (Reste en haut à gauche, prioritaire) #}
         <button 
             @click.stop="$store.wishlist.toggle({{ game.id }})" 
             class="absolute top-2 left-2 z-30 w-8 h-8 flex items-center justify-center rounded-full backdrop-blur-md shadow-lg transition-all duration-300 group/heart"
@@ -19,6 +22,7 @@
             </i>
         </button>
 
+        {# 2. POUBELLE (Superuser seulement - Décalé pour ne pas gêner le coeur) #}
         {% if request.user.is_superuser %}
         <form action="{% url 'delete_game' game.id %}" method="POST" onsubmit="return confirm('Supprimer {{ game.title|escapejs }} définitivement ?');" class="absolute top-2 left-12 z-30">
             {% csrf_token %}
@@ -28,38 +32,52 @@
         </form>
         {% endif %}
 
+        {# 3. IMAGE #}
         <img src="{{ game.cover_url }}" 
-                alt="Jaquette du jeu vidéo {{game.title}}" 
+                alt="Jaquette {{game.title}}" 
                 loading="lazy"
                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
         
         <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-80"></div>
         
-        {# Badges Types (Remake...) #}
-        <div class="absolute top-2 right-2 flex flex-col gap-1 items-end z-20">
+        {# 4. COLONNE DE DROITE (Note + Badges Types empilés) #}
+        <div class="absolute top-2 right-2 flex flex-col gap-2 items-end z-20">
+            
+            <div class="px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1 shadow-lg backdrop-blur-md border border-white/10
+                {% if game.rating >= 75 %}
+                    bg-emerald-500/90 text-white shadow-emerald-500/20
+                {% elif game.rating >= 50 %}
+                    bg-yellow-500/90 text-white shadow-yellow-500/20
+                {% else %}
+                    bg-red-500/90 text-white shadow-red-500/20
+                {% endif %}
+            ">
+                <i class="fa-solid fa-star text-[10px]"></i>
+                <span>{{ game.rating|floatformat:0 }}</span>
+            </div>
+
             {% if game.game_type == 8 %}
                 <span class="px-2 py-1 bg-purple-600/90 text-white text-[10px] font-black uppercase tracking-wider rounded shadow-lg backdrop-blur-sm border border-purple-400/30">Remake</span>
             {% elif game.game_type == 9 %}
                 <span class="px-2 py-1 bg-cyan-600/90 text-white text-[10px] font-black uppercase tracking-wider rounded shadow-lg backdrop-blur-sm border border-cyan-400/30">Remaster</span>
             {% elif game.game_type == 4 %}
-                <span class="px-2 py-1 bg-pink-600/90 text-white text-[10px] font-black uppercase tracking-wider rounded shadow-lg backdrop-blur-sm border border-pink-400/30">Expansion</span>
+                <span class="px-2 py-1 bg-pink-600/90 text-white text-[10px] font-black uppercase tracking-wider rounded shadow-lg backdrop-blur-sm border border-pink-400/30">DLC</span>
             {% endif %}
         </div>
 
+        {# 5. BARRE DU BAS (Info Méta) #}
         <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-sm z-10">
             <div class="flex items-center gap-2">
-                <span class="badge-blur text-green-300 bg-green-500/20" title="Note Utilisateurs">
-                    <i class="fa-solid fa-star text-[10px]"></i> {{game.rating|default:"-"}}
-                </span>
                 {% if game.release_year %}
                 <span class="badge-blur text-slate-300 bg-slate-700/50">
                     {{ game.release_year }}
                 </span>
                 {% endif %}
-                <span class="badge-blur text-blue-200 bg-slate-700/80" title="Temps de jeu (Histoire principale)">
+                <span class="badge-blur text-blue-200 bg-slate-700/80" title="Temps de jeu">
                     <i class="fa-regular fa-clock text-[10px]"></i> {{game.playtime_main}}h
                 </span>
             </div>
+
             {% if game.price_current is None %}
                 <span class="badge-blur text-slate-400 bg-slate-700/30 font-medium text-xs">Non dispo</span>
             {% elif game.price_current == 0 %}

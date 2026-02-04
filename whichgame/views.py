@@ -82,7 +82,16 @@ class HomeListView(ListView):
             except ValueError:
                 pass
 
-        return queryset.order_by('-rating')
+        params = self.request.GET.copy()
+        
+        if 'page' in params:
+            del params['page']
+
+        if params:
+             queryset = queryset.filter(total_rating_count__gte=5)
+             return queryset.order_by('-rating', '-total_rating_count')
+
+        return queryset.order_by('-total_rating_count', '-rating')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
