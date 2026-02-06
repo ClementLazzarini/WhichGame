@@ -32,6 +32,32 @@ Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu e
         {% for game in object_list %}
             {# GAME CARD #}
             {% include "includes/game_card.html" with game=game %}
+        {% empty %}
+            <div class="col-span-full flex flex-col items-center justify-center py-24 px-4 text-center animate-fade-in">
+                <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4 shadow-inner">
+                    <i class="fa-solid fa-ghost text-3xl text-slate-600"></i>
+                </div>
+                
+                <h3 class="text-xl font-bold text-white mb-2">Oups, aucun jeu trouvé...</h3>
+                <p class="text-slate-400 max-w-md mx-auto mb-6">
+                    Aucun résultat pour ces critères. Essaie de modifier les filtres ou cherche autre chose.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{% url 'game_list' %}" 
+                       class="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all border border-slate-700">
+                        Tout effacer
+                    </a>
+
+                    <a href="https://forms.gle/2iCdfokkSoCYYRgY7" 
+                       target="_blank"
+                       rel="noopener noreferrer" 
+                       class="px-6 py-2 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 hover:text-blue-300 border border-blue-500/30 rounded-xl font-bold transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        Suggérer ce jeu
+                    </a>
+                </div>
+            </div>
         {% endfor %}
     </div>
     {% if is_paginated %}
