@@ -64,13 +64,18 @@ class HomeListView(ListView):
             queryset = queryset.filter(genres__icontains=genre)
 
         # 6. Filtre Année
-        if year:
+        year_min = self.request.GET.get('year_min')
+        year_max = self.request.GET.get('year_max')
+
+        if year_min:
             try:
-                if year == 'retro':
-                    queryset = queryset.filter(release_year__lt=2010)
-                else:
-                    year_val = int(year)
-                    queryset = queryset.filter(release_year__gte=year_val)
+                queryset = queryset.filter(release_year__gte=int(year_min))
+            except ValueError:
+                pass
+        
+        if year_max:
+            try:
+                queryset = queryset.filter(release_year__lte=int(year_max))
             except ValueError:
                 pass
         
@@ -111,15 +116,6 @@ class HomeListView(ListView):
             "Sport", "Racing", "Fighting", "Simulator"
         ]
         
-        # Format : (valeur_url, etiquette_affichage)
-        context['years_list'] = [
-            ('2025', '2025 - 2026'),
-            ('2024', 'Après 2024'),
-            ('2020', 'Après 2020'),
-            ('2015', 'Après 2015'),
-            ('2010', 'Après 2010'),
-            ('retro', 'Rétro (Avant 2010)')
-        ]
         return context
 
 
