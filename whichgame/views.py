@@ -24,7 +24,8 @@ class HomeListView(ListView):
         duration = self.request.GET.get('duration')
         platform = self.request.GET.get('platform')
         genre = self.request.GET.get('genre')
-        year = self.request.GET.get('year')
+        year_min = self.request.GET.get('year_min')
+        year_max = self.request.GET.get('year_max')
         search = self.request.GET.get('search')
         wishlist_ids = self.request.GET.get('wishlist_ids')
 
@@ -64,8 +65,6 @@ class HomeListView(ListView):
             queryset = queryset.filter(genres__icontains=genre)
 
         # 6. Filtre Année
-        year_min = self.request.GET.get('year_min')
-        year_max = self.request.GET.get('year_max')
 
         if year_min:
             try:
