@@ -6,7 +6,7 @@ from django.db.models import Q
 from whichgame.models import Game
 
 class Command(BaseCommand):
-    help = 'Télécharge les promos multi-stores (Steam, Epic, GOG...) sans effacer les prix de base'
+    help = 'Télécharge les promos multi-stores (Steam, Epic, GOG...) et affiche les MAJ'
 
     def clean(self, name):
         """ Nettoie le titre pour faciliter la correspondance """
@@ -16,19 +16,17 @@ class Command(BaseCommand):
         self.stdout.write("🌍 1. Téléchargement des meilleures promos Multi-Stores...")
         
         live_deals = {}
-        # On peut monter à 50 pages (soit les 3000 meilleures promos du web)
         pages_to_fetch = 50 
         
         session = requests.Session()
 
         for page in range(pages_to_fetch):
-            # 💡 J'AI ENLEVÉ storeID=1 -> Ça cherche partout (Epic, GOG, Steam...)
-            url = f"https://www.cheapshark.com/api/1.0/deals?sortBy=Deal Rating&pageSize=60&page={page}"
+            # 🐛 CORRECTION DU BUG ICI : pageNumber au lieu de page
+            url = f"https://www.cheapshark.com/api/1.0/deals?sortBy=Deal Rating&pageSize=60&pageNumber={page}"
             
             try:
                 res = session.get(url, timeout=10)
                 
-                # Si on se prend un 429, on le signale clairement
                 if res.status_code == 429:
                     self.stdout.write(self.style.ERROR("\n🛑 Ton IP est encore bannie ! Attends la fin du chrono."))
                     return
@@ -58,8 +56,8 @@ class Command(BaseCommand):
         session.close()
 
         total_deals = len(live_deals)
-        self.stdout.write(self.style.SUCCESS(f"✅ {total_deals} deals récupérés en mémoire !"))
-        self.stdout.write("🧠 2. Croisement avec la base de données locale...")
+        self.stdout.write(self.style.SUCCESS(f"\n✅ {total_deals} deals UNIQUES récupérés en mémoire !"))
+        self.stdout.write("🧠 2. Croisement avec la base de données locale...\n")
 
         pc_platforms = ['PC (Microsoft Windows)', 'Mac', 'Linux', 'PC']
         query = Q()
@@ -72,19 +70,21 @@ class Command(BaseCommand):
         for game in local_games:
             clean_local_title = self.clean(game.title)
             
-            # Si le jeu est en promo en ce moment sur un des stores
             if clean_local_title in live_deals:
                 new_price = live_deals[clean_local_title]
+                old_price = game.price_current
                 
-                # On met à jour le prix
-                game.price_current = new_price
-                game.save(update_fields=['price_current'])
-                match_count += 1
-                
-            # 💡 NOTE IMPORTANTE : Il n'y a plus de "else" !
-            # Si le jeu n'est pas en promo, on ne touche à rien, il garde son prix précédent.
+                # 💡 OPTIMISATION : On ne sauvegarde QUE si le prix a changé ou s'il était vide
+                if old_price != new_price:
+                    game.price_current = new_price
+                    game.save(update_fields=['price_current'])
+                    match_count += 1
+                    
+                    # AFFICHAGE DE LA MISE À JOUR
+                    old_display = f"{old_price}€" if old_price is not None else "Aucun"
+                    self.stdout.write(self.style.SUCCESS(f"   💸 MAJ : {game.title[:40].ljust(40)} | {old_display} ➡️ {new_price}€"))
 
         self.stdout.write(self.style.SUCCESS(
-            f"🎉 Terminé ! \n"
+            f"\n🎉 Terminé ! \n"
             f"   🔥 {match_count} jeux mis à jour avec le prix promo du jour !"
         ))
