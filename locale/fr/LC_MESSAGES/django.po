@@ -1,0 +1,84 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-24 13:03+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+#: config/settings.py:125
+msgid "English"
+msgstr ""
+
+#: config/settings.py:126
+msgid "Français"
+msgstr ""
+
+#: templates/home.html:6
+msgid "Find your next adventure"
+msgstr ""
+
+#: templates/home.html:9
+msgid ""
+"Find your next video game based on your budget, playtime, and platform. "
+"Smart comparator."
+msgstr ""
+
+#: templates/home.html:24
+msgid "10,000+ games listed"
+msgstr "10 000+ jeux référencés"
+
+#: templates/home.html:28
+msgid "Start"
+msgstr "Commencez"
+
+#: templates/home.html:29
+msgid "playing."
+msgstr ""
+
+#: templates/home.html:33
+msgid "Stop scrolling. Find the perfect gem based on your time and budget."
+msgstr ""
+
+#: templates/home.html:38
+msgid "Explore the catalog"
+msgstr ""
+
+#: templates/home.html:42
+msgid "View selections"
+msgstr ""
+
+#: templates/home.html:48
+msgid "Scroll down"
+msgstr ""
+
+#: templates/home.html:86
+msgid "See all"
+msgstr ""
+
+#: templates/home.html:102
+msgid "No games in this collection at the moment."
+msgstr ""
+
+#: templates/home.html:111
+msgid "Didn't find what you're looking for?"
+msgstr ""
+
+#: templates/home.html:112
+msgid "Use our advanced filters to sort through over 10,000 titles."
+msgstr ""
+
+#: templates/home.html:114
+msgid "Launch an advanced search"
+msgstr ""

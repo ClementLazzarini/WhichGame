@@ -1,5 +1,6 @@
 {% load static %} 
-{% load my_filters %} 
+{% load my_filters %}
+{% load i18n %}
 
 <header 
     class="sticky top-0 z-50 w-full bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 py-4 shadow-md transition-all duration-300"
@@ -77,6 +78,20 @@
                         <i class="fa-solid fa-xmark"></i>
                     </a>
                     {% endif %}
+                </form>
+
+                <form action="{% url 'set_language' %}" method="post" class="inline-block">
+                    {% csrf_token %}
+                    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                    <select name="language" onchange="this.form.submit()" class="bg-slate-800 text-white rounded px-2 py-1 text-sm border border-slate-700">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% get_available_languages as LANGUAGES %}
+                        {% for language in LANGUAGES %}
+                            <option value="{{ language.0 }}" {% if language.0 == LANGUAGE_CODE %}selected{% endif %}>
+                                {{ language.0|upper }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </form>
 
                 {% if request.resolver_match.url_name == 'game_list' %}
