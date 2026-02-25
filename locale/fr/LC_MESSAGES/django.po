@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-24 13:03+0100\n"
+"POT-Creation-Date: 2026-02-25 12:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,23 +17,134 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
 #: config/settings.py:125
 msgid "English"
-msgstr ""
+msgstr "Anglais"
 
 #: config/settings.py:126
 msgid "Français"
-msgstr ""
+msgstr "Français"
 
-#: templates/home.html:6
+#: templates/base.html:10 templates/home.html:6
 msgid "Find your next adventure"
+msgstr "Trouvez votre prochaine aventure"
+
+#: templates/base.html:11
+msgid ""
+"Stop wasting time searching. Find the best video games based on your budget, "
+"playtime, and platforms (PC, PS5, Switch, Xbox)."
 msgstr ""
+"Ne perdez plus de temps à chercher. Trouvez les meilleurs jeux vidéo selon votre budget, "
+"votre temps de jeu et vos plateformes (PC, PS5, Switch, Xbox)."
+
+#: templates/base.html:18 templates/base.html:24
+msgid "WhichGame: Find the perfect video game for your budget"
+msgstr "WhichGame : Trouvez le jeu vidéo idéal selon votre budget"
+
+#: templates/base.html:19 templates/base.html:25
+msgid ""
+"Stop wasting hours choosing. Filter by price, lifespan, and platform to "
+"discover the best-rated gems on PC, Switch, PS5, and Xbox."
+msgstr ""
+"Ne perdez plus d'heures à choisir. Filtrez par prix, durée de vie et plateforme pour "
+"découvrir les meilleures pépites notées sur PC, Switch, PS5 et Xbox."
+
+#: templates/base.html:84
+msgid "Searching for gems..."
+msgstr "Recherche des pépites..."
+
+#: templates/base.html:100
+msgid "Budgets"
+msgstr "Budgets"
+
+#: templates/base.html:104
+msgid "Under 5€"
+msgstr "Moins de 5€"
+
+#: templates/base.html:107
+msgid "Under 15€"
+msgstr "Moins de 15€"
+
+#: templates/base.html:110
+msgid "Under 30€"
+msgstr "Moins de 30€"
+
+#: templates/base.html:117
+msgid "Playtime"
+msgstr "Durée"
+
+#: templates/base.html:121
+msgid "One evening (Under 5h)"
+msgstr "Soirée (Moins de 5h)"
+
+#: templates/base.html:124
+msgid "Weekend (10-30h)"
+msgstr "Week-end (10-30h)"
+
+#: templates/base.html:127
+msgid "Long Adventure (+50h)"
+msgstr "Longue Aventure (+50h)"
+
+#: templates/base.html:134
+msgid "Must-plays"
+msgstr "Incontournables"
+
+#: templates/base.html:138
+msgid "Masterpieces (90+)"
+msgstr "Chefs d'œuvre (90+)"
+
+#: templates/base.html:141
+msgid "Excellent & Cheap"
+msgstr "Excellents & Pas chers"
+
+#: templates/base.html:144
+msgid "Recent releases"
+msgstr "Sorties Récentes"
+
+#: templates/base.html:151
+msgid "Versions"
+msgstr "Versions"
+
+#: templates/base.html:155
+msgid "Remakes"
+msgstr "Les Remakes"
+
+#: templates/base.html:158
+msgid "Remasters"
+msgstr "Les Remasters"
+
+#: templates/base.html:161
+msgid "PC Games"
+msgstr "Jeux PC"
+
+#: templates/base.html:174
+msgid "Missing a game? Suggest it to us!"
+msgstr "Un jeu manque à l'appel ? Suggère-le nous !"
+
+#: templates/base.html:186
+msgid "About"
+msgstr "À propos"
+
+#: templates/base.html:190
+msgid "Legal Notice"
+msgstr "Mentions Légales"
+
+#: templates/base.html:202
+msgid "Made with"
+msgstr "Site réalisé avec"
+
+#: templates/base.html:202
+msgid "by"
+msgstr "par"
 
 #: templates/home.html:9
 msgid ""
 "Find your next video game based on your budget, playtime, and platform. "
 "Smart comparator."
 msgstr ""
+"Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu et de votre "
+"plateforme. Comparateur intelligent."
 
 #: templates/home.html:24
 msgid "10,000+ games listed"
@@ -45,40 +156,42 @@ msgstr "Commencez"
 
 #: templates/home.html:29
 msgid "playing."
-msgstr ""
+msgstr "à jouer."
 
 #: templates/home.html:33
 msgid "Stop scrolling. Find the perfect gem based on your time and budget."
 msgstr ""
+"Arrêtez de scroller. Trouvez la pépite parfaite en fonction de votre temps "
+"et de votre budget."
 
 #: templates/home.html:38
 msgid "Explore the catalog"
-msgstr ""
+msgstr "Explorer le catalogue"
 
 #: templates/home.html:42
 msgid "View selections"
-msgstr ""
+msgstr "Voir les sélections"
 
 #: templates/home.html:48
 msgid "Scroll down"
-msgstr ""
+msgstr "Descendre"
 
 #: templates/home.html:86
 msgid "See all"
-msgstr ""
+msgstr "Voir tout"
 
 #: templates/home.html:102
 msgid "No games in this collection at the moment."
-msgstr ""
+msgstr "Aucun jeux dans cette collection pour l'instant."
 
 #: templates/home.html:111
 msgid "Didn't find what you're looking for?"
-msgstr ""
+msgstr "Pas trouvé votre bonheur ?"
 
 #: templates/home.html:112
 msgid "Use our advanced filters to sort through over 10,000 titles."
-msgstr ""
+msgstr "Utilisez nos filtres avancés pour trier parmi plus de 10 000 titres."
 
 #: templates/home.html:114
 msgid "Launch an advanced search"
-msgstr ""
+msgstr "Lancer une recherche avancée"

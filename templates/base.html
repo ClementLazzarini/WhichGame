@@ -2,28 +2,27 @@
 {% load i18n %}
 {% load tailwind_tags %} 
 <!DOCTYPE html>
-<html lang="fr" class="scroll-smooth">
+<html lang="{{ LANGUAGE_CODE }}" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>{% block title %}WhichGame - Trouve ta prochaine pépite{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}Ne perdez plus de temps à chercher. Trouvez les meilleurs jeux vidéo selon votre budget, votre temps de jeu et vos plateformes (PC, PS5, Switch, Xbox).{% endblock %}">
+    <title>{% block title %}WhichGame - {% trans "Find your next adventure" %}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{% trans 'Stop wasting time searching. Find the best video games based on your budget, playtime, and platforms (PC, PS5, Switch, Xbox).' %}{% endblock %}">
     <meta name="author" content="Clément Lazzarini">
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}"/>
     <meta name="google-site-verification" content="_TRGAtDzQ2zdo3q8Lq22KbU5DZiLynBf8p_ZNrB0RYU" />
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.whichgame.app/">
-    <meta property="og:title" content="WhichGame : Trouvez le jeu vidéo idéal selon votre budget">
-    
-    <meta property="og:description" content="Ne perdez plus d'heures à choisir. Filtrez par prix, durée de vie et plateforme pour découvrir les meilleures pépites notées sur PC, Switch, PS5 et Xbox.">
+    <meta property="og:title" content="{% trans 'WhichGame: Find the perfect video game for your budget' %}">
+    <meta property="og:description" content="{% trans 'Stop wasting hours choosing. Filter by price, lifespan, and platform to discover the best-rated gems on PC, Switch, PS5, and Xbox.' %}">
     <meta property="og:image" content="https://www.whichgame.app{% static 'images/social-share.png' %}">
 
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://www.whichgame.app/">
-    <meta property="twitter:title" content="WhichGame : Trouvez le jeu vidéo idéal selon votre budget">
-    <meta property="twitter:description" content="Ne perdez plus d'heures à choisir. Filtrez par prix, durée de vie et plateforme pour découvrir les meilleures pépites notées sur PC, Switch, PS5 et Xbox.">
+    <meta property="twitter:title" content="{% trans 'WhichGame: Find the perfect video game for your budget' %}">
+    <meta property="twitter:description" content="{% trans 'Stop wasting hours choosing. Filter by price, lifespan, and platform to discover the best-rated gems on PC, Switch, PS5, and Xbox.' %}">
     <meta property="twitter:image" content="https://www.whichgame.app{% static 'images/social-share.png' %}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -82,7 +81,7 @@
             <div class="absolute inset-2 border-t-4 border-purple-500 border-solid rounded-full animate-spin" style="animation-direction: reverse; animation-duration: 1s;"></div>
         </div>
 
-        <p class="text-white font-bold text-lg animate-pulse">Recherche des pépites...</p>
+        <p class="text-white font-bold text-lg animate-pulse">{% trans "Searching for gems..." %}</p>
     </div>
     
     {% include 'includes/navbar.html' %}
@@ -98,68 +97,68 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12 text-left">
                 <div>
                     <h3 class="text-white font-bold mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-piggy-bank text-purple-500"></i> Budgets
+                        <i class="fa-solid fa-piggy-bank text-purple-500"></i> {% trans "Budgets" %}
                     </h3>
                     <ul class="space-y-2 text-sm">
                         <li>
-                            <a href="{% url 'game_list' %}?price_max=5" class="text-slate-400 hover:text-purple-400 transition-colors">Moins de 5€</a>
+                            <a href="{% url 'game_list' %}?price_max=5" class="text-slate-400 hover:text-purple-400 transition-colors">{% trans "Under 5€" %}</a>
                         </li>
                         <li>
-                            <a href="{% url 'game_list' %}?price_max=15" class="text-slate-400 hover:text-purple-400 transition-colors">Moins de 15€</a>
+                            <a href="{% url 'game_list' %}?price_max=15" class="text-slate-400 hover:text-purple-400 transition-colors">{% trans "Under 15€" %}</a>
                         </li>
                         <li>
-                            <a href="{% url 'game_list' %}?price_max=30" class="text-slate-400 hover:text-purple-400 transition-colors">Moins de 30€</a>
+                            <a href="{% url 'game_list' %}?price_max=30" class="text-slate-400 hover:text-purple-400 transition-colors">{% trans "Under 30€" %}</a>
                         </li>
                     </ul>
                 </div>
 
                 <div>
                     <h3 class="text-white font-bold mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-clock text-cyan-500"></i> Durée
+                        <i class="fa-solid fa-clock text-cyan-500"></i> {% trans "Playtime" %}
                     </h3>
                     <ul class="space-y-2 text-sm">
                         <li>
-                            <a href="{% url 'game_list' %}?playtime_max=5" class="text-slate-400 hover:text-cyan-400 transition-colors">Soirée (Moins de 5h)</a>
+                            <a href="{% url 'game_list' %}?playtime_max=5" class="text-slate-400 hover:text-cyan-400 transition-colors">{% trans "One evening (Under 5h)" %}</a>
                         </li>
                         <li>
-                            <a href="{% url 'game_list' %}?playtime_min=10&playtime_max=30" class="text-slate-400 hover:text-cyan-400 transition-colors">Week-end (10-30h)</a>
+                            <a href="{% url 'game_list' %}?playtime_min=10&playtime_max=30" class="text-slate-400 hover:text-cyan-400 transition-colors">{% trans "Weekend (10-30h)" %}</a>
                         </li>
                         <li>
-                            <a href="{% url 'game_list' %}?playtime_min=50" class="text-slate-400 hover:text-cyan-400 transition-colors">Longue Aventure (+50h)</a>
+                            <a href="{% url 'game_list' %}?playtime_min=50" class="text-slate-400 hover:text-cyan-400 transition-colors">{% trans "Long Adventure (+50h)" %}</a>
                         </li>
                     </ul>
                 </div>
 
                 <div>
                     <h3 class="text-white font-bold mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-star text-yellow-500"></i> Incontournables
+                        <i class="fa-solid fa-star text-yellow-500"></i> {% trans "Must-plays" %}
                     </h3>
                     <ul class="space-y-2 text-sm">
                         <li>
-                            <a href="{% url 'game_list' %}?rating_min=90" class="text-slate-400 hover:text-yellow-400 transition-colors">Chefs d'œuvre (90+)</a>
+                            <a href="{% url 'game_list' %}?rating_min=90" class="text-slate-400 hover:text-yellow-400 transition-colors">{% trans "Masterpieces (90+)" %}</a>
                         </li>
                         <li>
-                            <a href="{% url 'game_list' %}?rating_min=80&price_max=20" class="text-slate-400 hover:text-yellow-400 transition-colors">Excellents & Pas chers</a>
+                            <a href="{% url 'game_list' %}?rating_min=80&price_max=20" class="text-slate-400 hover:text-yellow-400 transition-colors">{% trans "Excellent & Cheap" %}</a>
                         </li>
                         <li>
-                            <a href="{% url 'game_list' %}?year_min=2023" class="text-slate-400 hover:text-yellow-400 transition-colors">Sorties Récentes</a>
+                            <a href="{% url 'game_list' %}?year_min=2023" class="text-slate-400 hover:text-yellow-400 transition-colors">{% trans "Recent releases" %}</a>
                         </li>
                     </ul>
                 </div>
 
                 <div>
                     <h3 class="text-white font-bold mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-wand-magic-sparkles text-pink-500"></i> Versions
+                        <i class="fa-solid fa-wand-magic-sparkles text-pink-500"></i> {% trans "Versions" %}
                     </h3>
                     <ul class="space-y-2 text-sm">
                         <li>
-                            <a href="{% url 'game_list' %}?search=Remake" class="text-slate-400 hover:text-pink-400 transition-colors">Les Remakes</a>
+                            <a href="{% url 'game_list' %}?search=Remake" class="text-slate-400 hover:text-pink-400 transition-colors">{% trans "Remakes" %}</a>
                         </li>
                         <li>
-                            <a href="{% url 'game_list' %}?search=Remaster" class="text-slate-400 hover:text-pink-400 transition-colors">Les Remasters</a>
+                            <a href="{% url 'game_list' %}?search=Remaster" class="text-slate-400 hover:text-pink-400 transition-colors">{% trans "Remasters" %}</a>
                         </li>
                         <li>
-                            <a href="{% url 'game_list' %}?platform=PC" class="text-slate-400 hover:text-pink-400 transition-colors">Jeux PC</a>
+                            <a href="{% url 'game_list' %}?platform=PC" class="text-slate-400 hover:text-pink-400 transition-colors">{% trans "PC Games" %}</a>
                         </li>
                     </ul>
                 </div>
@@ -172,7 +171,7 @@
                 class="inline-flex items-center gap-2 text-xs font-medium text-slate-500 hover:text-blue-400 transition-colors border-b border-transparent hover:border-blue-400 border-dashed pb-0.5"
                 >
                     <i class="fa-regular fa-lightbulb"></i>
-                    Un jeu manque à l'appel ? Suggère-le nous !
+                    {% trans "Missing a game? Suggest it to us!" %}
                 </a>
             </div>
 
@@ -184,11 +183,11 @@
             
             <div class="flex flex-wrap justify-center gap-6 text-sm font-medium mb-10">
                 <a href="{% url 'about' %}" class="text-slate-400 hover:text-white transition-colors duration-200 hover:underline decoration-blue-500 underline-offset-4">
-                    À propos
+                    {% trans "About" %}
                 </a>
                 <span class="text-slate-700 hidden sm:inline">•</span>
                 <a href="{% url 'legal' %}" class="text-slate-400 hover:text-white transition-colors duration-200 hover:underline decoration-blue-500 underline-offset-4">
-                    Mentions Légales
+                    {% trans "Legal Notice" %}
                 </a>
                 <span class="text-slate-700 hidden sm:inline">•</span>
                 <a href="https://github.com/ClementLazzarini" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors duration-200 flex items-center gap-2 hover:underline decoration-blue-500 underline-offset-4">
@@ -200,7 +199,7 @@
         <div class="border-t border-slate-900 bg-slate-900/50 py-6">
             <div class="max-w-6xl mx-auto px-4 text-center">
                 <p class="text-xs text-slate-500">
-                    Site réalisé avec <i class="fa-solid fa-heart text-red-500 animate-pulse"></i> par 
+                    {% trans "Made with" %} <i class="fa-solid fa-heart text-red-500 animate-pulse"></i> {% trans "by" %} 
                     <a href="https://www.clementlazzarini.com/" class="font-bold text-slate-400 hover:text-fuchsia-500 transition-colors" target="_blank">
                         Clément
                     </a>
