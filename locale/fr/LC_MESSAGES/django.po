@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-25 12:21+0100\n"
+"POT-Creation-Date: 2026-02-26 12:47+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,8 +35,8 @@ msgid ""
 "Stop wasting time searching. Find the best video games based on your budget, "
 "playtime, and platforms (PC, PS5, Switch, Xbox)."
 msgstr ""
-"Ne perdez plus de temps à chercher. Trouvez les meilleurs jeux vidéo selon votre budget, "
-"votre temps de jeu et vos plateformes (PC, PS5, Switch, Xbox)."
+"Ne perdez plus de temps à chercher. Trouvez les meilleurs jeux vidéo selon "
+"votre budget, votre temps de jeu et vos plateformes (PC, PS5, Switch, Xbox)."
 
 #: templates/base.html:18 templates/base.html:24
 msgid "WhichGame: Find the perfect video game for your budget"
@@ -47,8 +47,9 @@ msgid ""
 "Stop wasting hours choosing. Filter by price, lifespan, and platform to "
 "discover the best-rated gems on PC, Switch, PS5, and Xbox."
 msgstr ""
-"Ne perdez plus d'heures à choisir. Filtrez par prix, durée de vie et plateforme pour "
-"découvrir les meilleures pépites notées sur PC, Switch, PS5 et Xbox."
+"Ne perdez plus d'heures à choisir. Filtrez par prix, durée de vie et "
+"plateforme pour découvrir les meilleures pépites notées sur PC, Switch, PS5 "
+"et Xbox."
 
 #: templates/base.html:84
 msgid "Searching for gems..."
@@ -126,7 +127,7 @@ msgstr "Un jeu manque à l'appel ? Suggère-le nous !"
 msgid "About"
 msgstr "À propos"
 
-#: templates/base.html:190
+#: templates/base.html:190 templates/legal.html:6
 msgid "Legal Notice"
 msgstr "Mentions Légales"
 
@@ -143,8 +144,8 @@ msgid ""
 "Find your next video game based on your budget, playtime, and platform. "
 "Smart comparator."
 msgstr ""
-"Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de jeu et de votre "
-"plateforme. Comparateur intelligent."
+"Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de "
+"jeu et de votre plateforme. Comparateur intelligent."
 
 #: templates/home.html:24
 msgid "10,000+ games listed"
@@ -195,3 +196,55 @@ msgstr "Utilisez nos filtres avancés pour trier parmi plus de 10 000 titres."
 #: templates/home.html:114
 msgid "Launch an advanced search"
 msgstr "Lancer une recherche avancée"
+
+#: templates/legal.html:10
+msgid "1. Publisher"
+msgstr "1. Éditeur du site"
+
+#: templates/legal.html:11
+msgid "The WhichGame website is a non-profit personal project."
+msgstr "Le site WhichGame est un projet personnel à but non lucratif."
+
+#: templates/legal.html:12
+msgid "Contact:"
+msgstr "Contact :"
+
+#: templates/legal.html:16
+msgid "2. Hosting"
+msgstr "2. Hébergement"
+
+#: templates/legal.html:17
+msgid "The website is hosted by:"
+msgstr "Le site est hébergé par :"
+
+#: templates/legal.html:20
+msgid "Website:"
+msgstr "Site web :"
+
+#: templates/legal.html:24
+msgid "3. Data and Intellectual Property"
+msgstr "3. Données et Propriété Intellectuelle"
+
+#: templates/legal.html:25
+msgid ""
+"Game images and metadata are the property of their respective publishers and "
+"are provided via the IGDB API (Twitch Interactive, Inc)."
+msgstr ""
+"Les images de jeux et métadonnées sont la propriété de leurs éditeurs "
+"respectifs et sont fournies via l'API IGDB (Twitch Interactive, Inc)."
+
+#: templates/legal.html:26
+msgid "Pricing information is provided by the CheapShark API."
+msgstr "Les informations de prix sont fournies par l'API CheapShark."
+
+#: templates/legal.html:27
+msgid ""
+"This site does not store any user personal data at this time (no advertising "
+"tracking cookies)."
+msgstr ""
+"Ce site ne stocke aucune donnée personnelle utilisateur pour le moment (pas "
+"de cookies de tracking publicitaire)."
+
+#: templates/legal.html:31
+msgid "Gaming icons created by Hilmy Abiyyu A. - Flaticon"
+msgstr "Icônes gaming créées par Hilmy Abiyyu A. - Flaticon"
