@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-26 12:47+0100\n"
+"POT-Creation-Date: 2026-02-27 09:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,6 +25,53 @@ msgstr "Anglais"
 #: config/settings.py:126
 msgid "Français"
 msgstr "Français"
+
+#: templates/about.html:11
+msgid "Stop searching,"
+msgstr "Arrêtez de chercher,"
+
+#: templates/about.html:12
+msgid "start playing."
+msgstr "commencez à jouer."
+
+#: templates/about.html:15
+msgid ""
+"WhichGame is the answer to the paradox of choice. A minimalist interface to "
+"find your next adventure without scrolling for hours."
+msgstr ""
+"WhichGame est la réponse au paradoxe du choix. Une interface minimaliste "
+"pour trouver votre prochaine aventure sans scroller pendant des heures."
+
+#: templates/about.html:29
+msgid "The Problem"
+msgstr "Le Problème"
+
+#: templates/about.html:32
+msgid ""
+"We sometimes spend more time choosing a game than playing it. Too many "
+"choices, prices scattered across the web, and unknown lifespans that don't "
+"fit our schedule."
+msgstr ""
+"On passe parfois plus de temps à choisir un jeu qu'à y jouer. Trop de choix, des prix éparpillés sur le web et des durées de vie inconnues qui ne collent pas avec notre emploi du temps."
+
+#: templates/about.html:44
+msgid "The Solution"
+msgstr "La Solution"
+
+#: templates/about.html:47
+msgid ""
+"A centralized aggregator. Ask a simple question: <em>\"What costs less than "
+"20€ and lasts a weekend?\"</em> and get an immediate, data-driven answer."
+msgstr ""
+"Un agrégateur centralisé. Posez une question simple : <em>\"Qu'est-ce qui coûte moins de 20€ et dure un week-end ?\"</em> et obtenez une réponse immédiate, basée sur la data."
+
+#: templates/about.html:53
+msgid "Under the hood"
+msgstr "Sous le capot"
+
+#: templates/about.html:77
+msgid "Find a game now"
+msgstr "Trouver un jeu maintenant"
 
 #: templates/base.html:10 templates/home.html:6
 msgid "Find your next adventure"

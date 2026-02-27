@@ -39,7 +39,7 @@ urlpatterns += i18n_patterns(
     path('about/', TemplateView.as_view(template_name="about.html"), name='about'),
     path('legal/', TemplateView.as_view(template_name="legal.html"), name='legal'),
     
-    prefix_default_language=False 
+    prefix_default_language=True 
 )
 
 if settings.DEBUG:
