@@ -1,9 +1,10 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page non trouvée - 404</title>
+    <title>{% trans "Page not found - 404" %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -18,13 +19,13 @@
             404
         </div>
         <h1 class="text-3xl text-black font-bold mb-4 mt-8">
-            Oups ! Perdu dans le donjon ?
+            {% trans "Oops! Lost in the dungeon?" %}
         </h1>
         <p class="text-slate-900 mb-8 max-w-md font-black text-lg">
-            La page que vous cherchez a peut-être été supprimée, déplacée ou n'a jamais existé. Ou alors un Creeper l'a explosée.
+            {% trans "The page you are looking for may have been removed, moved, or never existed. Or maybe a Creeper blew it up." %}
         </p>
         <a href="/" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all font-black shadow-lg hover:shadow-blue-500/30 flex items-center">
-            <i class="fa-solid fa-house mr-2"></i> Retour à l'accueil
+            <i class="fa-solid fa-house mr-2"></i> {% trans "Back to home" %}
         </a>
     </div>
 

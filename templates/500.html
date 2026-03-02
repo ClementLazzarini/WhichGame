@@ -1,9 +1,10 @@
+{% load i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erreur Serveur - 500</title>
+    <title>{% trans "Server Error - 500" %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -18,13 +19,13 @@
             500
         </div>
         <h1 class="text-3xl text-black font-bold mb-4 mt-8">
-            Erreur Critique du Système
+            {% trans "Critical System Error" %}
         </h1>
         <p class="text-slate-900 mb-8 max-w-md font-black text-lg">
-            Nos serveurs ont rencontré un problème inattendu. Nos meilleurs ingénieurs (enfin je suis tout seul mais bon..😅) sont sur le coup.
+            {% trans "Our servers encountered an unexpected problem. Our best engineers (well, it's just me but still..😅) are on it." %}
         </p>
         <a href="/" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all font-black shadow-lg flex items-center">
-            <i class="fa-solid fa-rotate-right mr-2"></i> Réessayer / Accueil
+            <i class="fa-solid fa-rotate-right mr-2"></i> {% trans "Retry / Home" %}
         </a>
     </div>
 

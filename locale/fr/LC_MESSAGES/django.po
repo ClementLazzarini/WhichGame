@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-27 09:24+0100\n"
+"POT-Creation-Date: 2026-03-02 12:34+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,6 +25,44 @@ msgstr "Anglais"
 #: config/settings.py:126
 msgid "Français"
 msgstr "Français"
+
+#: templates/404.html:7
+msgid "Page not found - 404"
+msgstr "Page non trouvée - 404"
+
+#: templates/404.html:22
+msgid "Oops! Lost in the dungeon?"
+msgstr "Oups ! Perdu dans le donjon ?"
+
+#: templates/404.html:25
+msgid ""
+"The page you are looking for may have been removed, moved, or never existed. "
+"Or maybe a Creeper blew it up."
+msgstr ""
+"La page que vous cherchez a peut-être été supprimée, déplacée ou n'a jamais existé. Ou alors un Creeper l'a explosée."
+
+#: templates/404.html:28
+msgid "Back to home"
+msgstr "Retour à l'accueil"
+
+#: templates/500.html:7
+msgid "Server Error - 500"
+msgstr "Erreur Serveur - 500"
+
+#: templates/500.html:22
+msgid "Critical System Error"
+msgstr "Erreur Critique du Système"
+
+#: templates/500.html:25
+msgid ""
+"Our servers encountered an unexpected problem. Our best engineers (well, "
+"it's just me but still..😅) are on it."
+msgstr ""
+"Nos serveurs ont rencontré un problème inattendu. Nos meilleurs ingénieurs (enfin je suis tout seul mais bon..😅) sont sur le coup."
+
+#: templates/500.html:28
+msgid "Retry / Home"
+msgstr "Réessayer / Accueil"
 
 #: templates/about.html:11
 msgid "Stop searching,"
@@ -52,7 +90,9 @@ msgid ""
 "choices, prices scattered across the web, and unknown lifespans that don't "
 "fit our schedule."
 msgstr ""
-"On passe parfois plus de temps à choisir un jeu qu'à y jouer. Trop de choix, des prix éparpillés sur le web et des durées de vie inconnues qui ne collent pas avec notre emploi du temps."
+"On passe parfois plus de temps à choisir un jeu qu'à y jouer. Trop de choix, "
+"des prix éparpillés sur le web et des durées de vie inconnues qui ne collent "
+"pas avec notre emploi du temps."
 
 #: templates/about.html:44
 msgid "The Solution"
@@ -63,7 +103,9 @@ msgid ""
 "A centralized aggregator. Ask a simple question: <em>\"What costs less than "
 "20€ and lasts a weekend?\"</em> and get an immediate, data-driven answer."
 msgstr ""
-"Un agrégateur centralisé. Posez une question simple : <em>\"Qu'est-ce qui coûte moins de 20€ et dure un week-end ?\"</em> et obtenez une réponse immédiate, basée sur la data."
+"Un agrégateur centralisé. Posez une question simple : <em>\"Qu'est-ce qui "
+"coûte moins de 20€ et dure un week-end ?\"</em> et obtenez une réponse "
+"immédiate, basée sur la data."
 
 #: templates/about.html:53
 msgid "Under the hood"
