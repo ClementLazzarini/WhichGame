@@ -1,3 +1,5 @@
+{% load i18n %}
+
 <a href="{% url 'game_list' %}?search={{ game.title }}" class="group relative block bg-slate-800 rounded-xl overflow-hidden shadow-lg border border-slate-700 hover:border-blue-500/50 hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-1">
     <div class="aspect-[3/4] w-full relative overflow-hidden">
         <img src="{{ game.cover_url }}" alt="{{ game.title }}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
@@ -17,7 +19,7 @@
                 <i class="fa-regular fa-clock"></i> {{ game.playtime_main }}h
             </span>
             {% if game.price_current == 0 %}
-                <span class="text-green-400 font-bold">Gratuit</span>
+                <span class="text-green-400 font-bold">{% trans "Free" %}</span>
             {% elif game.price_current %}
                 <span class="text-blue-300 font-bold">{{ game.price_current }}€</span>
             {% else %}

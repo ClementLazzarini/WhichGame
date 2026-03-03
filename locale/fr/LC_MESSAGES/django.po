@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-02 12:34+0100\n"
+"POT-Creation-Date: 2026-03-03 12:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,7 +39,8 @@ msgid ""
 "The page you are looking for may have been removed, moved, or never existed. "
 "Or maybe a Creeper blew it up."
 msgstr ""
-"La page que vous cherchez a peut-être été supprimée, déplacée ou n'a jamais existé. Ou alors un Creeper l'a explosée."
+"La page que vous cherchez a peut-être été supprimée, déplacée ou n'a jamais "
+"existé. Ou alors un Creeper l'a explosée."
 
 #: templates/404.html:28
 msgid "Back to home"
@@ -58,7 +59,8 @@ msgid ""
 "Our servers encountered an unexpected problem. Our best engineers (well, "
 "it's just me but still..😅) are on it."
 msgstr ""
-"Nos serveurs ont rencontré un problème inattendu. Nos meilleurs ingénieurs (enfin je suis tout seul mais bon..😅) sont sur le coup."
+"Nos serveurs ont rencontré un problème inattendu. Nos meilleurs ingénieurs "
+"(enfin je suis tout seul mais bon..😅) sont sur le coup."
 
 #: templates/500.html:28
 msgid "Retry / Home"
@@ -285,6 +287,26 @@ msgstr "Utilisez nos filtres avancés pour trier parmi plus de 10 000 titres."
 #: templates/home.html:114
 msgid "Launch an advanced search"
 msgstr "Lancer une recherche avancée"
+
+#: templates/includes/mini_card.html:22
+msgid "Free"
+msgstr "Gratuit"
+
+#: templates/includes/pagination.html:11
+msgid "Previous"
+msgstr "Précédent"
+
+#: templates/includes/pagination.html:21
+msgid "Page"
+msgstr "Page"
+
+#: templates/includes/pagination.html:21
+msgid "of"
+msgstr "sur"
+
+#: templates/includes/pagination.html:27
+msgid "Next"
+msgstr "Suivant"
 
 #: templates/legal.html:10
 msgid "1. Publisher"
