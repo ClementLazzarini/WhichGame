@@ -33,7 +33,7 @@
 
         {# 3. IMAGE #}
         <img src="{{ game.cover_url }}" 
-                alt="Jaquette {{game.title}}" 
+                alt="Cover for {{game.title}}" 
                 loading="lazy"
                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
         
@@ -98,7 +98,7 @@
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 pointer-events-none"
             :class="showDetails ? '!opacity-0 pointer-events-none' : ''">
         <button class="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-full shadow-lg flex items-center gap-2 transform transition-transform group-hover:scale-105">
-            <i class="fa-solid fa-circle-info"></i> Plus d'informations
+            <i class="fa-solid fa-circle-info"></i> {% trans "More Information" %}
         </button>
     </div>
 
@@ -137,7 +137,7 @@
                 <template x-if="showTrailer">
                     <iframe 
                         src="https://www.youtube.com/embed/{{ game.video_id }}?autoplay=1&rel=0&origin={{ request.scheme }}://{{ request.get_host }}" 
-                        title="Trailer {{ game.title }}"
+                        title="Trailer for {{ game.title }}"
                         class="w-full h-full" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -151,7 +151,7 @@
             {# B. SCREENSHOTS #}
             {% if game.screenshots %}
             <div>
-                <span class="detail-label mb-2 block">Aperçu</span>
+                <span class="detail-label mb-2 block">{% trans "Preview" %}</span>
                 <div class="grid grid-cols-3 gap-2">
                     {% for screen_url in game.screenshots|slice:":3" %}
                     <div class="aspect-video rounded-lg overflow-hidden bg-slate-800 border border-slate-700 cursor-zoom-in group/screen">
@@ -171,18 +171,18 @@
                 <div>
                     <span class="detail-label">Genres</span>
                     <p class="text-sm text-slate-300 leading-snug font-medium">
-                        {{ game.genres|join:", "|default:"Non spécifié" }}
+                        {{ game.genres|join:", "|default:"Not specified" }}
                     </p>
                 </div>
                 <div>
-                    <span class="detail-label">Plateformes</span>
+                    <span class="detail-label">{% trans "Platforms" %}</span>
                     <div class="flex flex-wrap gap-1.5 mt-1">
                         {% for platform in game.platforms %}
                         <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] text-slate-300">
                             {{ platform }}
                         </span>
                         {% empty %}
-                        <span class="text-xs text-slate-500">Non spécifié</span>
+                        <span class="text-xs text-slate-500">{% trans "Not specified" %}</span>
                         {% endfor %}
                     </div>
                 </div>
@@ -191,7 +191,7 @@
             {# D. 🔥 RECOMMANDATIONS (NOUVEAU) #}
             {% if game.similar_games.all %}
             <div>
-                <span class="detail-label mb-2 block text-purple-300">Vous aimerez aussi</span>
+                <span class="detail-label mb-2 block text-purple-300">{% trans "You might also like" %}</span>
                 <div class="grid grid-cols-3 gap-2">
                     {% for similar in game.similar_games.all|slice:":3" %}
                     <a href="?search={{ similar.slug }}" 
@@ -221,7 +221,7 @@
                 @click.stop
                 class="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl transition-all shadow-md mb-2 border border-purple-400/30">
                     <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
-                    <span class="text-sm">Voir la version récente</span>
+                    <span class="text-sm">{% trans "See recent version" %}</span>
                 </a>
                 {% endif %}
 
@@ -283,7 +283,7 @@
                 {% if game.price_current is None and "Nintendo Switch" not in game.platforms and "PlayStation 5" not in game.platforms and "PlayStation 4" not in game.platforms and "Xbox Series X|S" not in game.platforms and "Xbox One" not in game.platforms %}
                     <button disabled class="w-full flex items-center justify-center gap-2 bg-slate-800 text-slate-500 font-bold py-2.5 rounded-xl cursor-not-allowed border border-slate-700">
                         <i class="fa-solid fa-ban text-sm"></i>
-                        <span class="text-sm">Non disponible</span>
+                        <span class="text-sm">{% trans "Not available" %}</span>
                     </button>
                 {% endif %}
             </div>

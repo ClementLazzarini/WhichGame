@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 12:09+0100\n"
+"POT-Creation-Date: 2026-03-04 10:02+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -118,6 +118,7 @@ msgid "Find a game now"
 msgstr "Trouver un jeu maintenant"
 
 #: templates/base.html:10 templates/home.html:6
+#: templates/includes/navbar.html:25
 msgid "Find your next adventure"
 msgstr "Trouvez votre prochaine aventure"
 
@@ -162,7 +163,8 @@ msgstr "Moins de 15€"
 msgid "Under 30€"
 msgstr "Moins de 30€"
 
-#: templates/base.html:117
+#: templates/base.html:117 templates/includes/navbar.html:163
+#: templates/includes/navbar.html:167
 msgid "Playtime"
 msgstr "Durée"
 
@@ -288,9 +290,95 @@ msgstr "Utilisez nos filtres avancés pour trier parmi plus de 10 000 titres."
 msgid "Launch an advanced search"
 msgstr "Lancer une recherche avancée"
 
-#: templates/includes/mini_card.html:22
+#: templates/includes/game_card.html:101
+msgid "More Information"
+msgstr "Plus d'informations"
+
+#: templates/includes/game_card.html:154
+msgid "Preview"
+msgstr "Aperçu"
+
+#: templates/includes/game_card.html:178
+msgid "Platforms"
+msgstr "Plateforme"
+
+#: templates/includes/game_card.html:185
+msgid "Not specified"
+msgstr "Non spécifié"
+
+#: templates/includes/game_card.html:194
+msgid "You might also like"
+msgstr "Vous aimerez aussi"
+
+#: templates/includes/game_card.html:224
+msgid "See recent version"
+msgstr "Voir la version récente"
+
+#: templates/includes/game_card.html:286
+msgid "Not available"
+msgstr "Non disponible"
+
+#: templates/includes/mini_card.html:22 templates/includes/navbar.html:142
 msgid "Free"
 msgstr "Gratuit"
+
+#: templates/includes/navbar.html:21
+msgid "gems found."
+msgstr "pépites trouvées."
+
+#: templates/includes/navbar.html:51
+msgid "My List"
+msgstr "Ma liste"
+
+#: templates/includes/navbar.html:71
+msgid "Search a game..."
+msgstr "Chercher un jeu..."
+
+#: templates/includes/navbar.html:113
+msgid "Set a maximum price"
+msgstr "Définir un prix maximum"
+
+#: templates/includes/navbar.html:130
+msgid "Max Budget"
+msgstr "Budget max"
+
+#: templates/includes/navbar.html:146 templates/includes/navbar.html:178
+#: templates/includes/navbar.html:243 templates/includes/navbar.html:270
+#: templates/includes/navbar.html:295
+msgid "Reset"
+msgstr "Réinitialiser"
+
+#: templates/includes/navbar.html:174
+msgid "Short"
+msgstr "Court"
+
+#: templates/includes/navbar.html:175
+msgid "Medium"
+msgstr "Moyen"
+
+#: templates/includes/navbar.html:199
+msgid "Year"
+msgstr "Année"
+
+#: templates/includes/navbar.html:217
+msgid "From"
+msgstr "De"
+
+#: templates/includes/navbar.html:223
+msgid "To"
+msgstr "À"
+
+#: templates/includes/navbar.html:236
+msgid "Apply"
+msgstr "Appliquer"
+
+#: templates/includes/navbar.html:282
+msgid "Platform"
+msgstr "Plateforme"
+
+#: templates/includes/navbar.html:303
+msgid "Entire Catalog"
+msgstr "Tout le catalogue"
 
 #: templates/includes/pagination.html:11
 msgid "Previous"
