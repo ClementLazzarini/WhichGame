@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-04 10:02+0100\n"
+"POT-Creation-Date: 2026-03-05 12:27+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -232,7 +232,7 @@ msgstr "Site réalisé avec"
 msgid "by"
 msgstr "par"
 
-#: templates/home.html:9
+#: templates/home.html:9 whichgame/templates/whichgame/game_list.html:8
 msgid ""
 "Find your next video game based on your budget, playtime, and platform. "
 "Smart comparator."
@@ -447,3 +447,26 @@ msgstr ""
 #: templates/legal.html:31
 msgid "Gaming icons created by Hilmy Abiyyu A. - Flaticon"
 msgstr "Icônes gaming créées par Hilmy Abiyyu A. - Flaticon"
+
+#: whichgame/templates/whichgame/game_list.html:5
+msgid "Video game search by price and playtime"
+msgstr "Recherche de jeux vidéo par prix et durée"
+
+#: whichgame/templates/whichgame/game_list.html:41
+msgid "Oops, no games found..."
+msgstr "Oups, aucun jeu trouvé..."
+
+#: whichgame/templates/whichgame/game_list.html:43
+msgid ""
+"No results for these criteria. Try changing the filters or searching for "
+"something else."
+msgstr ""
+"Aucun résultat pour ces critères. Essaie de modifier les filtres ou cherche autre chose."
+
+#: whichgame/templates/whichgame/game_list.html:49
+msgid "Clear all"
+msgstr "Tout effacer"
+
+#: whichgame/templates/whichgame/game_list.html:57
+msgid "Suggest this game"
+msgstr "Suggérer ce jeu"
