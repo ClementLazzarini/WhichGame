@@ -22,6 +22,7 @@ class Command(BaseCommand):
         suspects = Game.objects.filter(
             Q(platforms__icontains="Android") | 
             Q(platforms__icontains="iOS") | 
+            Q(platforms__icontains="Web browser") | 
             Q(platforms__icontains="Web Browser")
         )
         
