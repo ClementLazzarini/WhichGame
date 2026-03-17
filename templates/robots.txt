@@ -1,6 +1,7 @@
 User-agent: *
 Disallow: /admin/
 Disallow: /explorer/
+Disallow: /*?*
 Allow: /
 
 # Bloquer les bots d'IA (OpenAI, Amazon, Anthropic...)

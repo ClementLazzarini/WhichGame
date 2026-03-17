@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-05 12:39+0100\n"
+"POT-Creation-Date: 2026-03-17 12:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -117,31 +117,19 @@ msgstr "Sous le capot"
 msgid "Find a game now"
 msgstr "Trouver un jeu maintenant"
 
-#: templates/base.html:10 templates/home.html:6
-#: templates/includes/navbar.html:25
-msgid "Find your next adventure"
-msgstr "Trouvez votre prochaine aventure"
+#: templates/base.html:10 templates/base.html:18 templates/base.html:24
+#: templates/home.html:6
+msgid "Video Game Comparator: Playtime, Price & Platforms"
+msgstr "Comparateur de Jeux Vidéo : Durée de vie, Prix & Plateformes"
 
-#: templates/base.html:11
+#: templates/base.html:11 templates/base.html:19 templates/base.html:25
+#: templates/home.html:9
 msgid ""
-"Stop wasting time searching. Find the best video games based on your budget, "
-"playtime, and platforms (PC, PS5, Switch, Xbox)."
+"Find what game to play next. Filter 10,000+ video games by length, price, "
+"and platform (PC, PS5, Switch, Xbox). Smart game picker."
 msgstr ""
 "Ne perdez plus de temps à chercher. Trouvez les meilleurs jeux vidéo selon "
 "votre budget, votre temps de jeu et vos plateformes (PC, PS5, Switch, Xbox)."
-
-#: templates/base.html:18 templates/base.html:24
-msgid "WhichGame: Find the perfect video game for your budget"
-msgstr "WhichGame : Trouvez le jeu vidéo idéal selon votre budget"
-
-#: templates/base.html:19 templates/base.html:25
-msgid ""
-"Stop wasting hours choosing. Filter by price, lifespan, and platform to "
-"discover the best-rated gems on PC, Switch, PS5, and Xbox."
-msgstr ""
-"Ne perdez plus d'heures à choisir. Filtrez par prix, durée de vie et "
-"plateforme pour découvrir les meilleures pépites notées sur PC, Switch, PS5 "
-"et Xbox."
 
 #: templates/base.html:84
 msgid "Searching for gems..."
@@ -232,89 +220,77 @@ msgstr "Site réalisé avec"
 msgid "by"
 msgstr "par"
 
-#: templates/home.html:9 whichgame/templates/whichgame/game_list.html:8
-msgid ""
-"Find your next video game based on your budget, playtime, and platform. "
-"Smart comparator."
-msgstr ""
-"Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de "
-"jeu et de votre plateforme. Comparateur intelligent."
-
 #: templates/home.html:24
 msgid "10,000+ games listed"
 msgstr "10 000+ jeux référencés"
 
 #: templates/home.html:28
-msgid "Start"
-msgstr "Commencez"
+msgid "Find the perfect video game for your time and budget"
+msgstr "Trouvez le jeu vidéo idéal selon votre temps et votre budget"
 
-#: templates/home.html:29
-msgid "playing."
-msgstr "à jouer."
-
-#: templates/home.html:33
+#: templates/home.html:32
 msgid "Stop scrolling. Find the perfect gem based on your time and budget."
 msgstr ""
 "Arrêtez de scroller. Trouvez la pépite parfaite en fonction de votre temps "
 "et de votre budget."
 
-#: templates/home.html:38
+#: templates/home.html:37
 msgid "Explore the catalog"
 msgstr "Explorer le catalogue"
 
-#: templates/home.html:42
+#: templates/home.html:41
 msgid "View selections"
 msgstr "Voir les sélections"
 
-#: templates/home.html:48
+#: templates/home.html:47
 msgid "Scroll down"
 msgstr "Descendre"
 
-#: templates/home.html:86
+#: templates/home.html:85
 msgid "See all"
 msgstr "Voir tout"
 
-#: templates/home.html:102
+#: templates/home.html:101
 msgid "No games in this collection at the moment."
 msgstr "Aucun jeux dans cette collection pour l'instant."
 
-#: templates/home.html:111
+#: templates/home.html:110
 msgid "Didn't find what you're looking for?"
 msgstr "Pas trouvé votre bonheur ?"
 
-#: templates/home.html:112
+#: templates/home.html:111
 msgid "Use our advanced filters to sort through over 10,000 titles."
 msgstr "Utilisez nos filtres avancés pour trier parmi plus de 10 000 titres."
 
-#: templates/home.html:114
+#: templates/home.html:113
 msgid "Launch an advanced search"
 msgstr "Lancer une recherche avancée"
 
-#: templates/includes/game_card.html:101
+#: templates/includes/game_card.html:102
 msgid "More Information"
 msgstr "Plus d'informations"
 
-#: templates/includes/game_card.html:154
+#: templates/includes/game_card.html:155
 msgid "Preview"
 msgstr "Aperçu"
 
-#: templates/includes/game_card.html:178
+#: templates/includes/game_card.html:179
 msgid "Platforms"
 msgstr "Plateforme"
 
-#: templates/includes/game_card.html:185
+#: templates/includes/game_card.html:186
 msgid "Not specified"
 msgstr "Non spécifié"
 
-#: templates/includes/game_card.html:194
+#: templates/includes/game_card.html:195
 msgid "You might also like"
 msgstr "Vous aimerez aussi"
 
-#: templates/includes/game_card.html:224
+#: templates/includes/game_card.html:225
 msgid "See recent version"
 msgstr "Voir la version récente"
 
-#: templates/includes/game_card.html:286
+#: templates/includes/game_card.html:287
 msgid "Not available"
 msgstr "Non disponible"
 
@@ -325,6 +301,10 @@ msgstr "Gratuit"
 #: templates/includes/navbar.html:21
 msgid "gems found."
 msgstr "pépites trouvées."
+
+#: templates/includes/navbar.html:25
+msgid "Find your next adventure"
+msgstr "Trouvez votre prochaine aventure"
 
 #: templates/includes/navbar.html:51
 msgid "My List"
@@ -448,15 +428,23 @@ msgstr ""
 msgid "Gaming icons created by Hilmy Abiyyu A. - Flaticon"
 msgstr "Icônes gaming créées par Hilmy Abiyyu A. - Flaticon"
 
-#: whichgame/templates/whichgame/game_list.html:5
+#: whichgame/templates/whichgame/game_list.html:6
 msgid "Video game search by price and playtime"
 msgstr "Recherche de jeux vidéo par prix et durée"
 
-#: whichgame/templates/whichgame/game_list.html:41
+#: whichgame/templates/whichgame/game_list.html:9
+msgid ""
+"Find your next video game based on your budget, playtime, and platform. "
+"Smart comparator."
+msgstr ""
+"Trouvez votre prochain jeu vidéo en fonction de votre budget, du temps de "
+"jeu et de votre plateforme. Comparateur intelligent."
+
+#: whichgame/templates/whichgame/game_list.html:42
 msgid "Oops, no games found..."
 msgstr "Oups, aucun jeu trouvé..."
 
-#: whichgame/templates/whichgame/game_list.html:43
+#: whichgame/templates/whichgame/game_list.html:44
 msgid ""
 "No results for these criteria. Try changing the filters or searching for "
 "something else."
@@ -464,10 +452,24 @@ msgstr ""
 "Aucun résultat pour ces critères. Essaie de modifier les filtres ou cherche "
 "autre chose."
 
-#: whichgame/templates/whichgame/game_list.html:49
+#: whichgame/templates/whichgame/game_list.html:50
 msgid "Clear all"
 msgstr "Tout effacer"
 
-#: whichgame/templates/whichgame/game_list.html:57
+#: whichgame/templates/whichgame/game_list.html:58
 msgid "Suggest this game"
 msgstr "Suggérer ce jeu"
+
+#~ msgid ""
+#~ "Stop wasting hours choosing. Filter by price, lifespan, and platform to "
+#~ "discover the best-rated gems on PC, Switch, PS5, and Xbox."
+#~ msgstr ""
+#~ "Ne perdez plus d'heures à choisir. Filtrez par prix, durée de vie et "
+#~ "plateforme pour découvrir les meilleures pépites notées sur PC, Switch, "
+#~ "PS5 et Xbox."
+
+#~ msgid "Start"
+#~ msgstr "Commencez"
+
+#~ msgid "playing."
+#~ msgstr "à jouer."

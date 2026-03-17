@@ -3,10 +3,10 @@
 {% load my_filters %} 
 {% load i18n %} 
 
-{% block title %}WhichGame - {% trans "Find your next adventure" %}{% endblock %}
+{% block title %}WhichGame - {% trans "Video Game Comparator: Playtime, Price & Platforms" %}{% endblock %}
 
 {% block meta_description %}
-{% blocktrans %}Find your next video game based on your budget, playtime, and platform. Smart comparator.{% endblocktrans %}
+{% trans 'Find what game to play next. Filter 10,000+ video games by length, price, and platform (PC, PS5, Switch, Xbox). Smart game picker.' %}
 {% endblock %}
 
 {% block content %}
@@ -24,9 +24,8 @@
             🚀 {% trans "10,000+ games listed" %}
         </div>
 
-        <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-white mb-6 drop-shadow-2xl">
-            {% trans "Start" %}<br>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">{% trans "playing." %}</span>
+        <h1 class="text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter text-white mb-6 drop-shadow-2xl leading-tight max-w-4xl mx-auto">
+            {% trans "Find the perfect video game for your time and budget" %}
         </h1>
         
         <p class="mt-2 text-lg md:text-2xl text-slate-300 max-w-2xl mx-auto leading-relaxed font-light">
