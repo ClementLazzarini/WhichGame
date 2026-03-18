@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-17 12:40+0100\n"
+"POT-Creation-Date: 2026-03-18 12:29+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -220,6 +220,59 @@ msgstr "Site réalisé avec"
 msgid "by"
 msgstr "par"
 
+#: templates/game_detail.html:6
+msgid "Playtime, Price & Info"
+msgstr "Temps de jeu, Prix & Infos"
+
+#: templates/game_detail.html:9
+msgid "Discover"
+msgstr "Découvrez"
+
+#: templates/game_detail.html:9
+msgid "Playtime:"
+msgstr "Temps de jeu :"
+
+#: templates/game_detail.html:9
+msgid "Compare prices and platforms (PC, PS5, Switch, Xbox)."
+msgstr "Comparez les prix et plateformes (PC, PS5, Switch, Xbox)."
+
+#: templates/game_detail.html:16
+msgid "Back to search"
+msgstr "Retour à la recherche"
+
+#: templates/game_detail.html:23
+msgid "Cover for"
+msgstr "Couverture pour"
+
+#: templates/game_detail.html:39
+msgid "Remove from List"
+msgstr "Retirer de la liste"
+
+#: templates/game_detail.html:39
+msgid "Add to List"
+msgstr "Ajouter à la liste"
+
+#: templates/game_detail.html:62
+msgid "playtime"
+msgstr "de jeu"
+
+#: templates/game_detail.html:69 templates/includes/game_card.html:183
+msgid "Platforms"
+msgstr "Plateforme"
+
+#: templates/game_detail.html:74 templates/game_detail.html:84
+#: templates/includes/game_card.html:190
+msgid "Not specified"
+msgstr "Non spécifié"
+
+#: templates/game_detail.html:79
+msgid "Genres"
+msgstr "Genres"
+
+#: templates/game_detail.html:92
+msgid "About the game"
+msgstr "À propos du jeu"
+
 #: templates/home.html:24
 msgid "10,000+ games listed"
 msgstr "10 000+ jeux référencés"
@@ -266,31 +319,27 @@ msgstr "Utilisez nos filtres avancés pour trier parmi plus de 10 000 titres."
 msgid "Launch an advanced search"
 msgstr "Lancer une recherche avancée"
 
-#: templates/includes/game_card.html:102
-msgid "More Information"
-msgstr "Plus d'informations"
+#: templates/includes/game_card.html:105
+msgid "Quick view"
+msgstr "Aperçu rapide"
 
-#: templates/includes/game_card.html:155
+#: templates/includes/game_card.html:159
 msgid "Preview"
 msgstr "Aperçu"
 
-#: templates/includes/game_card.html:179
-msgid "Platforms"
-msgstr "Plateforme"
-
-#: templates/includes/game_card.html:186
-msgid "Not specified"
-msgstr "Non spécifié"
-
-#: templates/includes/game_card.html:195
+#: templates/includes/game_card.html:199
 msgid "You might also like"
 msgstr "Vous aimerez aussi"
 
-#: templates/includes/game_card.html:225
+#: templates/includes/game_card.html:229
+msgid "See full page"
+msgstr "Voir la page complète"
+
+#: templates/includes/game_card.html:237
 msgid "See recent version"
 msgstr "Voir la version récente"
 
-#: templates/includes/game_card.html:287
+#: templates/includes/game_card.html:299
 msgid "Not available"
 msgstr "Non disponible"
 
@@ -459,6 +508,14 @@ msgstr "Tout effacer"
 #: whichgame/templates/whichgame/game_list.html:58
 msgid "Suggest this game"
 msgstr "Suggérer ce jeu"
+
+#~ msgid "More Information"
+#~ msgstr "Plus d'informations"
+
+#, fuzzy
+#~| msgid "More Information"
+#~ msgid "More information"
+#~ msgstr "Plus d'informations"
 
 #~ msgid ""
 #~ "Stop wasting hours choosing. Filter by price, lifespan, and platform to "

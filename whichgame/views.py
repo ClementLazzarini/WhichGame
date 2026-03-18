@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.utils.html import format_html
 from django.http import HttpResponse
 from django.template import Template, RequestContext
-from django.views.generic import ListView, TemplateView
+from django.views.generic import ListView, TemplateView, DetailView
 from django.db.models import Q
 from .models import Game , GameCollection
 
@@ -132,6 +132,11 @@ class HomeView(TemplateView):
         
         return context
 
+
+class GameDetailView(DetailView):
+    model = Game
+    template_name = "game_detail.html"
+    context_object_name = "game"
 
 @staff_member_required
 def delete_game(request, pk):

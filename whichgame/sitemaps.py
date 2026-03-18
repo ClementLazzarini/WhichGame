@@ -15,11 +15,11 @@ class StaticViewSitemap(Sitemap):
 
 class GameSitemap(Sitemap):
     """Gère les liens directs vers chaque jeu"""
-    priority = 0.6
+    priority = 0.8 
     changefreq = 'weekly'
 
     def items(self):
-        return Game.objects.filter(slug__isnull=False).order_by('id')
+        return Game.objects.filter(slug__isnull=False).order_by('-total_rating_count')
 
     def location(self, obj):
-        return f"/explorer/?search={obj.slug}" # type: ignore
+        return reverse('game_detail', args=[obj.slug])
