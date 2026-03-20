@@ -1,117 +1,169 @@
-import requests
 import os
 import json
 import time
+import requests
 from datetime import datetime, timedelta
+from decouple import config
+
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from decouple import config
 from whichgame.models import Game
 
 class Command(BaseCommand):
-    help = 'LAYER 2 : Import NOUVEAUTÉS (Seulement les 1 et 15 du mois, sauf si --force)'
+    help = 'Fetches recent game releases from IGDB (Runs automatically on the 1st and 15th of each month).'
 
     def add_arguments(self, parser):
-        # Ajout de l'argument pour forcer l'exécution manuelle
         parser.add_argument(
             '--force',
             action='store_true',
-            help='Forcer l\'exécution même si on n\'est pas le 1er ou le 15'
+            help='Bypass the date restriction and run the script immediately.'
         )
 
     def handle(self, *args, **options):
-        # --- 0. VÉRIFICATION DE LA DATE ---
+        # 1. Schedule Check
         today = datetime.now().day
-        
-        # Si on n'est ni le 1, ni le 15, ET qu'on n'a pas mis --force
         if today not in [1, 15] and not options['force']:
-            self.stdout.write(self.style.WARNING(f"📅 Nous sommes le {today}. Script programmé pour les 1 et 15 uniquement. Arrêt."))
+            self.stdout.write(self.style.WARNING(f"Skipping execution: Today is the {today}th. Use --force to run manually."))
             return
 
-        self.stdout.write("🔥 Démarrage Import NEWS Qualitatif...")
+        self.stdout.write(self.style.SUCCESS("Starting new releases import..."))
 
-        # 1. AUTH IGDB
+        # 2. Authentication
+        access_token = self._get_twitch_access_token()
+        if not access_token:
+            self.stdout.write(self.style.ERROR("Failed to obtain Twitch access token. Aborting."))
+            return
+
+        headers = {
+            'Client-ID': config('IGDB_CLIENT_ID'),
+            'Authorization': f'Bearer {access_token}'
+        }
+
+        # 3. Fetch Recent Games (Last 60 Days)
+        games_data = self._fetch_recent_games(headers)
+        if not games_data:
+            self.stdout.write(self.style.WARNING("No recent games found matching the criteria."))
+            return
+
+        # 4. Fetch Playtimes
+        playtimes_map = self._fetch_playtimes(headers, games_data)
+
+        # 5. Process and Save to Database
+        self._process_and_save_games(games_data, playtimes_map)
+
+    def _get_twitch_access_token(self):
+        """Retrieves or generates a valid Twitch OAuth token."""
         token_file = os.path.join(settings.BASE_DIR, 'twitch_token.json')
-        access_token = None
         client_id = config('IGDB_CLIENT_ID')
         client_secret = config('IGDB_CLIENT_SECRET')
 
+        # Check existing cached token
         if os.path.exists(token_file):
             try:
                 with open(token_file, 'r') as f:
                     data = json.load(f)
-                    if data.get('expires_at') > time.time() + 60: 
-                        access_token = data.get('access_token')
-            except:  # noqa: E722
-                pass
+                    if data.get('expires_at', 0) > time.time() + 60:
+                        return data.get('access_token')
+            except json.JSONDecodeError:
+                pass # Invalid JSON, proceed to fetch a new one
 
-        if not access_token:
-            try:
-                auth = requests.post("https://id.twitch.tv/oauth2/token", params={
-                    'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'
-                }).json()
-                access_token = auth.get('access_token') # Utilisation de .get() plus sûr
-                if not access_token:
-                    return
+        # Fetch new token from Twitch API
+        try:
+            response = requests.post("https://id.twitch.tv/oauth2/token", params={
+                'client_id': client_id,
+                'client_secret': client_secret,
+                'grant_type': 'client_credentials'
+            })
+            response.raise_for_status()
+            auth_data = response.json()
+            
+            access_token = auth_data.get('access_token')
+            if access_token:
+                # Cache the new token
                 with open(token_file, 'w') as f:
-                    json.dump({'access_token': access_token, 'expires_at': time.time() + auth['expires_in']}, f)
-            except Exception: 
-                return
+                    json.dump({
+                        'access_token': access_token,
+                        'expires_at': time.time() + auth_data['expires_in']
+                    }, f)
+                return access_token
+        except requests.RequestException as e:
+            self.stdout.write(self.style.ERROR(f"Twitch Auth API Error: {e}"))
+        
+        return None
 
-        headers = {'Client-ID': client_id, 'Authorization': f'Bearer {access_token}'}
-
-        # 2. REQUÊTE : Jeux sortis les 60 derniers jours
+    def _fetch_recent_games(self, headers):
+        """Fetches high-quality games released within the last 60 days."""
         timestamp_now = int(time.time())
         timestamp_past = int((datetime.now() - timedelta(days=60)).timestamp())
         
-        fields = "fields name, slug, rating, total_rating_count, hypes, summary, cover.url, platforms.name, genres.name, themes.name, first_release_date, release_dates.y, game_type, videos.video_id, screenshots.url"
+        fields = (
+            "fields name, slug, rating, total_rating_count, hypes, summary, "
+            "cover.url, platforms.name, genres.name, themes.name, "
+            "first_release_date, release_dates.y, game_type, videos.video_id, screenshots.url"
+        )
         
-        body = f"{fields}; where game_type = (0, 8, 9) & cover != null & first_release_date > {timestamp_past} & first_release_date <= {timestamp_now}; sort first_release_date desc; limit 100;"
+        query = (
+            f"{fields}; "
+            f"where game_type = (0, 8, 9) & cover != null & "
+            f"first_release_date > {timestamp_past} & first_release_date <= {timestamp_now}; "
+            f"sort first_release_date desc; limit 100;"
+        )
 
         try:
-            response = requests.post("https://api.igdb.com/v4/games", headers=headers, data=body)
-            games_data = response.json()
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f"Erreur API: {e}"))
-            return
+            response = requests.post("https://api.igdb.com/v4/games", headers=headers, data=query)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            self.stdout.write(self.style.ERROR(f"IGDB Games API Error: {e}"))
+            return []
 
-        if not games_data:
-            self.stdout.write(self.style.WARNING("⚠️ Aucun jeu récent trouvé."))
-            return
-
-        # 3. HLTB
-        game_ids = [g['id'] for g in games_data]
-        ids_string = ",".join(map(str, game_ids))
-        times_map = {}
+    def _fetch_playtimes(self, headers, games_data):
+        """Fetches playtime data for the retrieved games and caps it to prevent UI bugs."""
+        game_ids = [str(g['id']) for g in games_data]
+        ids_string = ",".join(game_ids)
+        playtimes_map = {}
+        
+        query = f"fields game_id, hastily, normally, completely; where game_id = ({ids_string}); limit 500;"
+        
         try:
-            body_t = f"fields game_id, hastily, normally, completely; where game_id = ({ids_string}); limit 500;"
-            resp_t = requests.post("https://api.igdb.com/v4/game_time_to_beats", headers=headers, data=body_t)
-            for t in resp_t.json():
-                s = t.get('hastily') or t.get('normally') or t.get('completely') or 0
-                if s > 0: 
-                    # --- AJOUT PLAFOND ANTI-BUG ---
-                    hours = round(s / 3600)
-                    if hours > 500: 
-                        hours = 500
-                    times_map[t['game_id']] = max(1, hours)
-        except:  # noqa: E722
-            pass
+            response = requests.post("https://api.igdb.com/v4/game_time_to_beats", headers=headers, data=query)
+            response.raise_for_status()
+            
+            for time_data in response.json():
+                seconds = time_data.get('hastily') or time_data.get('normally') or time_data.get('completely') or 0
+                if seconds > 0:
+                    hours = round(seconds / 3600)
+                    # Cap at 500 hours to avoid extreme outlier data
+                    playtimes_map[time_data['game_id']] = max(1, min(hours, 500)) 
+        except requests.RequestException:
+            pass # Silently fail playtimes, not critical for the main import
+            
+        return playtimes_map
 
-        # 4. SAUVEGARDE FILTRÉE
-        count = 0
-        ignored = 0
+    def _process_and_save_games(self, games_data, playtimes_map):
+        """Formats the data, applies strict filters, and saves games to the database."""
+        added_count = 0
+        ignored_count = 0
         
         for data in games_data:
+            # 1. Quality Filter (Requires minimal reviews or hype)
             rating_count = data.get('total_rating_count', 0)
             hypes = data.get('hypes', 0)
             
             if rating_count < 5 and hypes < 5:
-                ignored += 1
+                ignored_count += 1
                 continue
 
-            r_date = None
+            # 2. Platform Filter (Exclude Web Browser games)
+            platform_names = [p['name'] for p in data.get('platforms', [])]
+            if any("web browser" in p.lower() for p in platform_names):
+                ignored_count += 1
+                continue
+
+            # 3. Data Formatting
+            release_date = None
             if 'first_release_date' in data:
-                r_date = datetime.fromtimestamp(data['first_release_date']).date()
+                release_date = datetime.fromtimestamp(data['first_release_date']).date()
 
             cover_url = ""
             if 'cover' in data and 'url' in data['cover']:
@@ -119,14 +171,14 @@ class Command(BaseCommand):
                 if cover_url.startswith('//'): 
                     cover_url = f"https:{cover_url}"
 
-            vid_id = None
-            if 'videos' in data:
-                vid_id = next((v['video_id'] for v in data['videos'] if 'video_id' in v), None)
+            video_id = next((v['video_id'] for v in data.get('videos', []) if 'video_id' in v), None)
+            
+            screenshots = [
+                s['url'].replace('t_thumb', 't_1080p').replace('//', 'https://') 
+                for s in data.get('screenshots', [])[:3] if 'url' in s
+            ]
 
-            screens = []
-            if 'screenshots' in data:
-                screens = [s['url'].replace('t_thumb', 't_1080p').replace('//', 'https://') for s in data['screenshots'][:3] if 'url' in s]
-
+            # 4. Database Save
             try:
                 Game.objects.update_or_create(
                     igdb_id=data['id'],
@@ -137,20 +189,20 @@ class Command(BaseCommand):
                         'total_rating_count': rating_count,
                         'summary': data.get('summary', ''),
                         'cover_url': cover_url,
-                        'platforms': [p['name'] for p in data.get('platforms', [])],
+                        'platforms': platform_names,
                         'genres': [g['name'] for g in data.get('genres', [])],
                         'themes': [t['name'] for t in data.get('themes', [])],
-                        'playtime_main': times_map.get(data['id'], 0),
+                        'playtime_main': playtimes_map.get(data['id'], 0),
                         'game_type': data.get('game_type', 0),
                         'release_year': min([d['y'] for d in data.get('release_dates', []) if 'y' in d], default=None),
-                        'first_release_date': r_date,
-                        'video_id': vid_id,
-                        'screenshots': screens
+                        'first_release_date': release_date,
+                        'video_id': video_id,
+                        'screenshots': screenshots
                     }
                 )
-                count += 1
-                self.stdout.write(f"   ✅ NEWS: {data['name']} (Hype: {hypes} | Avis: {rating_count})")
+                added_count += 1
+                self.stdout.write(self.style.SUCCESS(f"   [ADDED] {data['name']} (Hype: {hypes} | Reviews: {rating_count})"))
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f"Erreur: {e}"))
+                self.stdout.write(self.style.ERROR(f"   [ERROR] Failed to save {data.get('name', 'Unknown')}: {e}"))
 
-        self.stdout.write(self.style.SUCCESS(f"🏁 Terminé. {count} nouveautés ajoutées. {ignored} poubelles évitées."))
+        self.stdout.write(self.style.SUCCESS(f"Finished. Added: {added_count} | Ignored (Low Quality/Web): {ignored_count}"))
