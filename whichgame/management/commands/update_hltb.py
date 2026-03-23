@@ -1,84 +1,105 @@
-import time
-import re
 import os
+import re
+import time
+
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from whichgame.models import Game
 from howlongtobeatpy import HowLongToBeat
 
 class Command(BaseCommand):
-    help = 'LAYER 3 : Enrichissement des temps de jeu via HowLongToBeat (Production)'
+    help = 'Fetches and updates game playtimes via HowLongToBeat (Rate-limit safe, max 10/run).'
 
     def handle(self, *args, **options):
-        # 1. Gestion de l'état (Reprise sur erreur/arrêt)
         state_file = os.path.join(settings.BASE_DIR, 'hltb_update.state')
-        offset = 0
-        limit = 10  # On reste prudent avec le scraping (10 par 10)
-        
-        if os.path.exists(state_file):
-            with open(state_file, 'r') as f:
-                try: 
-                    offset = int(f.read().strip())
-                except ValueError: 
-                    offset = 0
+        limit = 10
+        offset = self._get_offset(state_file)
 
-        # Récupération du lot de jeux
-        games_to_update = Game.objects.all().order_by('id')[offset:offset+limit]
+        # 1. Fetch the next batch of games
+        games_to_update = Game.objects.all().order_by('id')[offset:offset + limit]
         
-        # Si on arrive au bout de la BDD, on repart à 0
         if not games_to_update:
-            self.stdout.write(self.style.SUCCESS(f"✅ Tout est à jour (Offset {offset}). En attente de nouveaux jeux..."))
+            self.stdout.write(self.style.SUCCESS(f"✅ All playtimes are up to date (Offset {offset}). Waiting for new games..."))
             return
 
-        self.stdout.write(f"⏱️  Traitement HLTB (Offset {offset} - {len(games_to_update)} jeux)...")
+        self.stdout.write(f"⏱️ Updating playtimes for {len(games_to_update)} games (Offset: {offset})...")
+        
+        # Initialize the scraper tool once for the batch
         hltb_tool = HowLongToBeat()
 
+        # 2. Process the batch
         for game in games_to_update:
-            # OPTIMISATION : Si on a déjà un temps > 0 (via IGDB), on passe pour économiser l'API
-            # Si tu veux privilégier la précision HLTB sur IGDB, commente ces 2 lignes :
-            # if game.playtime_main and game.playtime_main > 0:
-            #    self.stdout.write(f"   ⏩ {game.title[:20]}... : Déjà OK ({game.playtime_main}h)")
-            #    continue 
+            found_time = self._fetch_playtime(hltb_tool, game.title)
 
-            found_time = 0
-            try:
-                # Stratégie 1 : Recherche Nom Exact
-                results = hltb_tool.search(game.title)
-                
-                # Stratégie 2 : Recherche Nom Nettoyé (si échec)
-                if not results:
-                    clean_title = re.sub(r'[^\w\s]', '', game.title)
-                    if clean_title != game.title:
-                        results = hltb_tool.search(clean_title)
+            if found_time > 0:
+                game.playtime_main = found_time
+                # Only update the specific field to optimize database write
+                game.save(update_fields=['playtime_main'])
+                self.stdout.write(self.style.SUCCESS(f"   ✅ {game.title[:30]}: Updated -> {found_time}h"))
+            else:
+                self.stdout.write(self.style.WARNING(f"   ⚠️ {game.title[:30]}: Not found on HLTB"))
 
-                if results:
-                    # On prend le résultat le plus pertinent
-                    best = max(results, key=lambda x: x.similarity)
-                    found_time = int(best.main_story)
-
-                if found_time > 0:
-                    game.playtime_main = found_time
-                    game.save()
-                    
-                    # DEBUG : Relecture immédiate pour vérifier l'écriture
-                    game.refresh_from_db()
-                    if game.playtime_main == found_time:
-                         self.stdout.write(f"   ✅ {game.title}... : Mis à jour -> {found_time}h (Confirmé BDD)")
-                    else:
-                         self.stdout.write(self.style.ERROR(f"   💀 {game.title}... : ECHEC ECRITURE ! Lu: {game.playtime_main}"))
-                         
-                else:
-                    self.stdout.write(self.style.WARNING(f"   ⚠️ {game.title[:20]}... : Pas trouvé"))
-
-            except Exception as e:
-                self.stdout.write(self.style.ERROR(f"   ❌ Erreur sur {game.title}: {e}"))
-
-            # PAUSE OBLIGATOIRE (Anti-Ban) - Ne pas descendre en dessous de 1.0s
+            # Anti-ban sleep (HLTB is strictly monitored, keep at least 1.2s delay)
             time.sleep(1.2)
 
-        # 2. Sauvegarde du nouvel offset pour la prochaine exécution
-        next_offset = offset + limit
+        # 3. Save state for the next cron execution
+        new_offset = offset + limit
+        self._save_offset(state_file, new_offset)
+        self.stdout.write(self.style.SUCCESS(f"💾 Batch complete. Next offset: {new_offset}"))
+
+    def _get_offset(self, state_file):
+        """Reads the current offset from the state file."""
+        if os.path.exists(state_file):
+            try:
+                with open(state_file, 'r') as f:
+                    return int(f.read().strip())
+            except ValueError:
+                pass
+        return 0
+
+    def _save_offset(self, state_file, offset):
+        """Saves the new offset to the state file."""
         with open(state_file, 'w') as f:
-            f.write(str(next_offset))
+            f.write(str(offset))
+
+    def _clean_title(self, title):
+        """Removes special characters to improve search matching."""
+        return re.sub(r'[^\w\s]', '', title)
+        
+    def _short_title(self, title):
+        """Removes subtitles after a colon or dash (e.g., 'The Witcher 3: Wild Hunt' -> 'The Witcher 3')."""
+        return re.split(r'[:\-]', title)[0].strip()
+
+    def _fetch_playtime(self, hltb_tool, title):
+        """
+        Attempts to find the game on HLTB and returns the main story playtime.
+        Returns 0 if not found or if an error occurs.
+        """
+        try:
+            # Strategy 1: Exact title search
+            results = hltb_tool.search(title)
             
-        self.stdout.write(self.style.SUCCESS(f"💾 Batch terminé. Prochain offset : {next_offset}"))
+            # Strategy 2: Cleaned title search
+            if not results:
+                clean_title = self._clean_title(title)
+                if clean_title != title:
+                    results = hltb_tool.search(clean_title)
+                    
+            # Strategy 3: Shortened title search (drop subtitles)
+            if not results:
+                short_title = self._short_title(title)
+                if short_title != title:
+                    results = hltb_tool.search(short_title)
+
+            if results:
+                # Select the most relevant result based on the similarity score
+                best_match = max(results, key=lambda x: x.similarity)
+                
+                # Parse the playtime safely (HLTB can return floats or None)
+                if best_match.main_story:
+                    return int(round(float(best_match.main_story)))
+                
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"   ❌ Error fetching '{title}': {e}"))
+            
+        return 0
