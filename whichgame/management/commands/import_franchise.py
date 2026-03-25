@@ -1,137 +1,152 @@
-import requests
 import os
 import json
 import time
+import requests
+from decouple import config
+
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from decouple import config
 from whichgame.models import Game
 
 class Command(BaseCommand):
-    help = 'Importe tous les jeux d\'une franchise spécifique (ex: "Mario", "Zelda")'
+    help = 'Imports all games from a specific franchise or search query (e.g., "Mario", "Zelda").'
 
     def add_arguments(self, parser):
-        parser.add_argument('query', type=str, help='Nom de la franchise ou du jeu à chercher')
+        parser.add_argument('query', type=str, help='Name of the franchise or game to search')
 
     def handle(self, *args, **options):
         query = options['query']
-        self.stdout.write(f"🔍 Recherche de la franchise : '{query}'...")
+        self.stdout.write(f"🔍 Searching for franchise: '{query}'...")
 
-        # --- 1. AUTHENTIFICATION (Copier-Coller de ta logique existante) ---
+        # 1. Authentication
+        access_token = self._get_twitch_access_token()
+        if not access_token:
+            self.stdout.write(self.style.ERROR("❌ Failed to obtain Twitch access token. Aborting."))
+            return
+
+        headers = {
+            'Client-ID': config('IGDB_CLIENT_ID'),
+            'Authorization': f'Bearer {access_token}'
+        }
+
+        # 2. Search Games on IGDB
+        games_data = self._search_franchise_games(headers, query)
+        if not games_data:
+            self.stdout.write(self.style.WARNING(f"⚠️ No games found for query '{query}'."))
+            return
+
+        # 3. Fetch Playtimes
+        playtimes_map = self._fetch_playtimes(headers, games_data)
+
+        # 4. Process and Save to Database
+        self._process_and_save_games(games_data, playtimes_map, query)
+
+    def _get_twitch_access_token(self):
+        """Retrieves or generates a valid Twitch OAuth token."""
         token_file = os.path.join(settings.BASE_DIR, 'twitch_token.json')
-        access_token = None
         client_id = config('IGDB_CLIENT_ID')
         client_secret = config('IGDB_CLIENT_SECRET')
 
-        # Lecture cache
         if os.path.exists(token_file):
             try:
                 with open(token_file, 'r') as f:
                     data = json.load(f)
-                    if data.get('expires_at') > time.time() + 60:
-                        access_token = data.get('access_token')
-            except Exception: 
+                    if data.get('expires_at', 0) > time.time() + 60:
+                        return data.get('access_token')
+            except json.JSONDecodeError:
                 pass
 
-        # Renouvellement si besoin
-        if not access_token:
-            try:
-                auth = requests.post("https://id.twitch.tv/oauth2/token", params={
-                    'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'
-                }).json()
-                access_token = auth.get('access_token')
-                if not access_token: 
-                    return
+        try:
+            response = requests.post("https://id.twitch.tv/oauth2/token", params={
+                'client_id': client_id,
+                'client_secret': client_secret,
+                'grant_type': 'client_credentials'
+            })
+            response.raise_for_status()
+            auth_data = response.json()
+            
+            access_token = auth_data.get('access_token')
+            if access_token:
                 with open(token_file, 'w') as f:
-                    json.dump({'access_token': access_token, 'expires_at': time.time() + auth['expires_in']}, f)
-            except Exception: 
-                return
+                    json.dump({
+                        'access_token': access_token,
+                        'expires_at': time.time() + auth_data['expires_in']
+                    }, f)
+                return access_token
+        except requests.RequestException:
+            pass
+        return None
 
-        headers = {'Client-ID': client_id, 'Authorization': f'Bearer {access_token}'}
+    def _search_franchise_games(self, headers, query):
+        """Searches IGDB for games matching the provided query."""
+        fields = (
+            "fields name, slug, rating, cover.url, platforms.name, genres.name, "
+            "first_release_date, release_dates.y, game_type, videos.video_id, screenshots.url"
+        )
+        # Search syntax for IGDB
+        igdb_query = f'search "{query}"; {fields}; where game_type = (0, 8, 9) & cover != null; limit 50;'
 
-        # --- 2. RECHERCHE IGDB ---
-        # Note l'utilisation de 'search' au lieu de 'where' pour le nom
-        # On garde les filtres game_type pour éviter les DLCs obscurs
-        body_games = f'''
-            fields name, slug, rating, total_rating_count, cover.url, platforms.name, genres.name, release_dates.y, game_type, videos.video_id, screenshots.url;
-            search "{query}";
-            where game_type = (0, 8, 9) & cover != null & version_parent = null;
-            limit 50;
-        '''
+        try:
+            response = requests.post("https://api.igdb.com/v4/games", headers=headers, data=igdb_query)
+            response.raise_for_status()
+            return response.json()
+        except requests.RequestException as e:
+            self.stdout.write(self.style.ERROR(f"IGDB Search API Error: {e}"))
+            return []
+
+    def _fetch_playtimes(self, headers, games_data):
+        """Fetches playtime data for the retrieved games."""
+        game_ids = [str(g['id']) for g in games_data]
+        if not game_ids:
+            return {}
+
+        ids_string = ",".join(game_ids)
+        playtimes_map = {}
+        
+        query = f"fields game_id, hastily, normally, completely; where game_id = ({ids_string}); limit 500;"
         
         try:
-            response = requests.post("https://api.igdb.com/v4/games", headers=headers, data=body_games)
-            games_data = response.json()
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f"Erreur API: {e}"))
-            return
+            response = requests.post("https://api.igdb.com/v4/game_time_to_beats", headers=headers, data=query)
+            response.raise_for_status()
+            
+            for time_data in response.json():
+                seconds = time_data.get('hastily') or time_data.get('normally') or time_data.get('completely') or 0
+                if seconds > 0:
+                    playtimes_map[time_data['game_id']] = max(1, round(seconds / 3600))
+        except requests.RequestException:
+            pass
+            
+        return playtimes_map
 
-        if not games_data:
-            self.stdout.write(self.style.WARNING(f"Aucun jeu trouvé pour '{query}'."))
-            return
-
-        self.stdout.write(f"🎯 {len(games_data)} jeux trouvés. Récupération des temps de jeu...")
-
-        # --- 3. HLTB (Temps de jeu) ---
-        game_ids = [g['id'] for g in games_data]
-        ids_string = ",".join(map(str, game_ids))
-        
-        body_times = f"fields game_id, hastily, normally, completely; where game_id = ({ids_string}); limit 100;"
-        times_map = {}
-        
-        try:
-            response_time = requests.post("https://api.igdb.com/v4/game_time_to_beats", headers=headers, data=body_times)
-            times_data = response_time.json()
-            if isinstance(times_data, list):
-                for t in times_data:
-                    seconds = t.get('hastily') or t.get('normally') or t.get('completely') or 0
-                    if seconds > 0:
-                        hours = round(seconds / 3600)
-                        times_map[t['game_id']] = max(1, hours)
-        except Exception:
-            pass # On continue même si HLTB échoue
-
-        # --- 4. SAUVEGARDE ---
+    def _process_and_save_games(self, games_data, playtimes_map, query):
+        """Formats the data, applies filters, and saves games to the database."""
         count = 0
+        ignored = 0
+
         for data in games_data:
-            if 'name' not in data: 
+            # 1. Platform Filter (Exclude Web Browser games)
+            platform_names = [p['name'] for p in data.get('platforms', [])]
+            if any("web browser" in p.lower() for p in platform_names):
+                ignored += 1
                 continue
 
-            # --- Filtre Anti-Poubelle Intégré (Optionnel mais recommandé) ---
-            # Si le jeu a moins de 5 votes ET n'est pas tout récent (> 2023), on zappe
-            # Tu peux commenter ces 3 lignes si tu veux TOUT importer
-            rating_count = data.get('total_rating_count', 0)
+            # 2. Data Formatting
             release_year = min([d['y'] for d in data.get('release_dates', []) if 'y' in d], default=0)
-            if rating_count < 5 and release_year < 2023:
-                 self.stdout.write(self.style.WARNING(f"   Skip (Trop peu populaire): {data['name']}"))
-                 continue
 
-            # Traitement Images
             cover_url = ""
             if 'cover' in data and 'url' in data['cover']:
                 cover_url = data['cover']['url'].replace('t_thumb', 't_cover_big')
                 if cover_url.startswith('//'): 
                     cover_url = f"https:{cover_url}"
 
-            # Traitement Vidéos
-            vid_id = None
-            if 'videos' in data and data['videos']:
-                for v in data['videos']:
-                    if 'video_id' in v:
-                        vid_id = v['video_id']
-                        break
+            video_id = next((v['video_id'] for v in data.get('videos', []) if 'video_id' in v), None)
+            
+            screenshots = [
+                s['url'].replace('t_thumb', 't_1080p').replace('//', 'https://') 
+                for s in data.get('screenshots', [])[:3] if 'url' in s
+            ]
 
-            # Traitement Screenshots
-            screens_list = []
-            if 'screenshots' in data:
-                for sc in data['screenshots'][:3]: 
-                    if 'url' in sc:
-                        url = sc['url'].replace('t_thumb', 't_1080p')
-                        if url.startswith('//'): 
-                            url = f"https:{url}"
-                        screens_list.append(url)
-
-            # Sauvegarde DB
+            # 3. Database Save
             try:
                 Game.objects.update_or_create(
                     igdb_id=data['id'],
@@ -140,18 +155,18 @@ class Command(BaseCommand):
                         'slug': data['slug'],
                         'rating': data.get('rating'),
                         'cover_url': cover_url,
-                        'platforms': [p['name'] for p in data.get('platforms', [])],
+                        'platforms': platform_names,
                         'genres': [g['name'] for g in data.get('genres', [])],
-                        'playtime_main': times_map.get(data['id'], 0),
+                        'playtime_main': playtimes_map.get(data['id'], 0),
                         'game_type': data.get('game_type', 0),
                         'release_year': release_year if release_year > 0 else None,
-                        'video_id': vid_id,
-                        'screenshots': screens_list
+                        'video_id': video_id,
+                        'screenshots': screenshots
                     }
                 )
                 count += 1
-                self.stdout.write(f"   ✅ Importé: {data['name']}")
+                self.stdout.write(self.style.SUCCESS(f"   ✅ Imported: {data['name']}"))
             except Exception as e:
-                self.stdout.write(self.style.ERROR(f"Erreur save {data['name']}: {e}"))
+                self.stdout.write(self.style.ERROR(f"   [ERROR] Failed to save {data.get('name', 'Unknown')}: {e}"))
 
-        self.stdout.write(self.style.SUCCESS(f"✨ Terminé ! {count} jeux importés pour la franchise '{query}'."))
+        self.stdout.write(self.style.SUCCESS(f"✨ Finished! {count} games imported for franchise '{query}' ({ignored} ignored)."))
