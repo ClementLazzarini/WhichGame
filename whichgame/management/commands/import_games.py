@@ -184,7 +184,6 @@ class Command(BaseCommand):
 
             # 4. Database Save / Update Logic
             try:
-                # Dictionnaire des champs qui peuvent être mis à jour sans risque
                 update_data = {
                     'title': data['name'],
                     'slug': data['slug'],
@@ -202,19 +201,16 @@ class Command(BaseCommand):
                     'screenshots': screenshots
                 }
 
-                # On utilise get_or_create pour séparer la création de la mise à jour
                 game, created = Game.objects.get_or_create(
                     igdb_id=data['id'],
                     defaults={
-                        **update_data, # On injecte toutes les données de base
+                        **update_data,
                         'playtime_main': playtimes_map.get(data['id'], 0),
-                        # 'price': data.get('price', 0)  <-- Ajoute ton champ prix ici dans les 'defaults'
+                        'price': data.get('price', 0)
                     }
                 )
 
                 if not created:
-                    # Le jeu existait déjà : on met à jour uniquement les champs de 'update_data'
-                    # Les champs 'playtime_main' et le prix ne seront pas touchés !
                     for field, value in update_data.items():
                         setattr(game, field, value)
                     game.save()
