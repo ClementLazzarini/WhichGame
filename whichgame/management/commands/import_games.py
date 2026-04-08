@@ -10,7 +10,7 @@ from django.conf import settings
 from whichgame.models import Game
 
 class Command(BaseCommand):
-    help = 'Fetches and updates the main catalog of games from IGDB (Max 10,000 games).'
+    help = 'Fetches and updates the main catalog of games from IGDB, looping back to 0 after 10,000 to catch new entrants.'
 
     def add_arguments(self, parser):
         parser.add_argument('--limit', type=int, default=500, help='Number of games to fetch per run.')
@@ -20,9 +20,10 @@ class Command(BaseCommand):
         limit = options['limit']
         offset = self._get_offset(state_file)
 
+        # Modification ici : au lieu de stopper le script, on remet l'offset à 0
         if offset >= 10000:
-            self.stdout.write(self.style.SUCCESS("🛑 Maximum limit of 10,000 games reached. Halting import."))
-            return
+            self.stdout.write(self.style.WARNING("🔄 Limite de 10 000 jeux atteinte. Réinitialisation de l'offset à 0 pour récupérer les nouveautés."))
+            offset = 0
         
         self.stdout.write(f"🚀 Starting IGDB catalog import (Offset: {offset}, Limit: {limit})...")
 
@@ -51,7 +52,7 @@ class Command(BaseCommand):
 
         # 5. Update State
         self._save_offset(state_file, offset + limit)
-        self.stdout.write(self.style.SUCCESS(f"✅ Batch complete. Imported: {added_count} | Ignored (Low ratings/Web): {ignored_count}"))
+        self.stdout.write(self.style.SUCCESS(f"✅ Batch complete. Imported/Updated: {added_count} | Ignored (Low ratings/Web): {ignored_count}"))
 
     def _get_offset(self, state_file):
         """Reads the current offset from the state file."""
@@ -146,8 +147,8 @@ class Command(BaseCommand):
         return playtimes_map
 
     def _process_and_save_games(self, games_data, playtimes_map):
-        """Formats the data, applies strict filters, and saves games to the database."""
-        added_count = 0
+        """Formats the data, applies strict filters, and saves/updates games selectively."""
+        processed_count = 0
         ignored_count = 0
         
         for data in games_data:
@@ -181,30 +182,46 @@ class Command(BaseCommand):
                 for s in data.get('screenshots', [])[:3] if 'url' in s
             ]
 
-            # 4. Database Save
+            # 4. Database Save / Update Logic
             try:
-                Game.objects.update_or_create(
+                # Dictionnaire des champs qui peuvent être mis à jour sans risque
+                update_data = {
+                    'title': data['name'],
+                    'slug': data['slug'],
+                    'rating': data.get('rating'),
+                    'total_rating_count': rating_count,
+                    'summary': data.get('summary', ''),
+                    'cover_url': cover_url,
+                    'platforms': platform_names,
+                    'genres': [g['name'] for g in data.get('genres', [])],
+                    'themes': [t['name'] for t in data.get('themes', [])],
+                    'game_type': data.get('game_type', 0),
+                    'release_year': min([d['y'] for d in data.get('release_dates', []) if 'y' in d], default=None),
+                    'first_release_date': release_date,
+                    'video_id': video_id,
+                    'screenshots': screenshots
+                }
+
+                # On utilise get_or_create pour séparer la création de la mise à jour
+                game, created = Game.objects.get_or_create(
                     igdb_id=data['id'],
                     defaults={
-                        'title': data['name'],
-                        'slug': data['slug'],
-                        'rating': data.get('rating'),
-                        'total_rating_count': rating_count,
-                        'summary': data.get('summary', ''),
-                        'cover_url': cover_url,
-                        'platforms': platform_names,
-                        'genres': [g['name'] for g in data.get('genres', [])],
-                        'themes': [t['name'] for t in data.get('themes', [])],
+                        **update_data, # On injecte toutes les données de base
                         'playtime_main': playtimes_map.get(data['id'], 0),
-                        'game_type': data.get('game_type', 0),
-                        'release_year': min([d['y'] for d in data.get('release_dates', []) if 'y' in d], default=None),
-                        'first_release_date': release_date,
-                        'video_id': video_id,
-                        'screenshots': screenshots
+                        # 'price': data.get('price', 0)  <-- Ajoute ton champ prix ici dans les 'defaults'
                     }
                 )
-                added_count += 1
+
+                if not created:
+                    # Le jeu existait déjà : on met à jour uniquement les champs de 'update_data'
+                    # Les champs 'playtime_main' et le prix ne seront pas touchés !
+                    for field, value in update_data.items():
+                        setattr(game, field, value)
+                    game.save()
+
+                processed_count += 1
+
             except Exception as e:
                 self.stdout.write(self.style.ERROR(f"   [ERROR] Failed to save {data.get('name', 'Unknown')}: {e}"))
 
-        return added_count, ignored_count
+        return processed_count, ignored_count
